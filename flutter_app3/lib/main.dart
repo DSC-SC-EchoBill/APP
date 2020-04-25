@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:flutterapp3/UI/CustomInputField.dart';
 import 'package:flutter/cupertino.dart';
@@ -23,11 +25,14 @@ import 'package:load/load.dart';
 import 'package:link/link.dart';
 import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(
+    MyApp(),
+);
 
 int _selectedIndex = 0; // 네비게이션 바 체크
-String username;
+String username= "";
 
 Color c1 = const Color.fromRGBO(164, 205, 57, 100);
 Color c2 = const Color.fromRGBO(208, 222, 63, 100);
@@ -42,7 +47,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: isLoggedIn ? Loginpage() : MainPage(),
+      home: Loginpage(),
+      theme : ThemeData(fontFamily: 'KoPubWorld'),
     );
   }
 }
@@ -58,7 +64,6 @@ class _LoginpageState extends State<Loginpage> {
   TextEditingController Password = new TextEditingController();
   TextEditingController Id = new TextEditingController();
   static const Color transparent = Color(0x00000000);
-
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +155,7 @@ class _LoginpageState extends State<Loginpage> {
                             height: 50.0,
                             child: GestureDetector(
                               onTap: () {
-                                isLoggedIn ? logout() : loginUser();
+                                loginUser();
                                 postRequest();
                               },
                               child: Material(
@@ -220,7 +225,9 @@ class _LoginpageState extends State<Loginpage> {
       print("Response status: ${response.statusCode}");
       if (response.statusCode == 200) {
         Fluttertoast.showToast(msg: '로그인 성공!');
-        username = Id.text;
+        setState(() {
+          username = Id.text;
+        });
         Navigator.push(context,
             FadeRoute(page: MainPage())
         );
@@ -260,15 +267,11 @@ class _LoginpageState extends State<Loginpage> {
   }
 
   Future<Null> logout() async {
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('username', null);
     prefs.setString('userpassword', null);
 
-    setState(() {
-      name = '';
-      password = '';
-      isLoggedIn = false;
-    });
   }
 
   Future<Null> loginUser() async {
@@ -397,9 +400,6 @@ class _IDPWState extends State<IDPW> {
                             child: Center(
                               child: Text(
                                 'Search Password',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Montserrat'),
                               ),
                             ),
                           )
@@ -508,21 +508,37 @@ class _MainPageState extends State<MainPage> {
     return WillPopScope(
       onWillPop: _backPressed,
       child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Eco Bill'),
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios),
+                  tooltip: 'Logout',
+                onPressed: (){
+                  setState(() {
+                    isLoggedIn = false;
+                  });
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          backgroundColor: c1,
+        ),
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
               upperHalf(context),
               lowerHalf(context),
             ],
-          ),
+          ),physics: NeverScrollableScrollPhysics(),
         ),
         bottomNavigationBar: BottomNavigationBar(
             onTap: _onItemTapped,
             currentIndex: _selectedIndex,
             fixedColor: c1,
             items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('메인 화면')),
-              BottomNavigationBarItem(icon: Icon(Icons.list), title: Text('영수증 목록'))
+              BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Main')),
+              BottomNavigationBarItem(icon: Icon(Icons.list), title: Text('List'))
             ]),
           floatingActionButton: new FloatingActionButton(
               backgroundColor: c1,
@@ -588,8 +604,8 @@ class _MainPageState extends State<MainPage> {
   initState(){
     print(username);
     super.initState();
-    postRequestautoLogin();
   }
+
   //qr인식
   Future scan() async {
     try {
@@ -612,7 +628,10 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  //영수증 나오는 부분
   void _showImageView(String Url){
+    String url = 'https:'+Url; //영수증 이미지 URL
+    print('Url : ${url}');
     showDialog(
         context: context,
       builder: (BuildContext){
@@ -624,7 +643,7 @@ class _MainPageState extends State<MainPage> {
                     child: Column(
                         children: <Widget>[
                         Container(
-                        child: Image.network(Url),
+                        child: Image.network(url), //이미지
                   ),
             ],
                     )
@@ -638,7 +657,7 @@ class _MainPageState extends State<MainPage> {
                           width: 150,
                           child:GestureDetector(
                             onTap: (){
-                              _saveNetworkImage(Url);
+                              _saveNetworkImage(url);
                             },
                           child: Material(
                               borderRadius: BorderRadius.circular(20.0),
@@ -663,9 +682,8 @@ class _MainPageState extends State<MainPage> {
                           width: 150,
                           child:GestureDetector(
                             onTap: () {
-                              Navigator.push(context,
-                                  FadeRoute(page: MainPage())
-                              );},
+                              print("push");
+                              Navigator.pop(context);},
                             child: Material(
                                 borderRadius: BorderRadius.circular(20.0),
                                 shadowColor: Colors.greenAccent,
@@ -724,66 +742,20 @@ class _MainPageState extends State<MainPage> {
         body: body
     ).then((http.Response response) {
       print("Response status: ${response.statusCode}");
+      print("BoDY: ${response.body}");
+      print(response.headers);
+      print(response.request);
+      print(response.body.trim().split(':')[1].split('"')[0]);
       if (response.statusCode == 200) {
         Fluttertoast.showToast(msg: '이미지 추출 성공');
-        _showWebView(response.body.trim().split(':')[1].split('"')[0]);
+        print(response.body.trim().split(':')[1].split('"')[0].toString());
+        _showImageView(response.body.trim().split(':')[1].split('"')[0].toString());
       } else if (response.statusCode == 400) {
         Fluttertoast.showToast(msg: '이미지 추출에 실패함');
       } else {
         Fluttertoast.showToast(msg: '관리자에게 문의하세요');
       }
       print("Response body: ${response.contentLength}");
-      print(response.headers);
-      print(response.request);
-      print(response.body.trim().split(':')[1].split('"')[0]);
-    });
-  }
-
-  void _showWebView(String Url) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return Scaffold(
-          appBar: AppBar(
-              title: Text('전자영수증'),
-              automaticallyImplyLeading: true,
-              leading: IconButton(icon: Icon(Icons.arrow_back),
-                onPressed: () => {
-                  Navigator.pop(context,false),}
-                ,)
-          ),
-          body: WebView(
-            initialUrl: Url,
-            onPageFinished: (Url){
-              print("Loaded $Url");
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Future<http.Response> postRequestautoLogin() async {
-    var url = 'http://dsc-ereceipt.appspot.com/api/auth/signin/';
-    PostSignIn p = new PostSignIn(name, password);
-    var body = jsonEncode(p.toJson());
-    print("Body : " + body);
-    http.post(url,
-        headers: {"Content-type": "application/json"},
-        body: body
-    ).then((http.Response response) {
-      print("Response status: ${response.statusCode}");
-      if (response.statusCode == 200) {
-        Fluttertoast.showToast(msg: '로그인 성공!');
-      } else if (response.statusCode == 400) {
-        Fluttertoast.showToast(msg: '아이디 비밀번호가 맞지 않습니다');
-      } else {
-        Fluttertoast.showToast(msg: '관리자에게 문의하세요');
-      }
-      print("Response body: ${response.contentLength}");
-      print(response.headers);
-      print(response.request);
     });
   }
 
@@ -1006,12 +978,39 @@ class _ListPageState extends State<ListPage> {
   DateTime _dateTime1; //상세보기 날짜
   DateTime _dateTime2; //상세보기 날짜 2
   final format = DateFormat("yyyy-MM-dd"); //날짜 형식
+
+  final _suggestions = <WordPair>[];
+  final _biggerFont = const TextStyle(fontSize: 18);
+
+  static const Color transparent = Color(0x00000000);
+
+  TextEditingController Date1 = new TextEditingController();
+  TextEditingController Date2 = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
     return WillPopScope(
       onWillPop: _backPressed,
       child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Eco Bill'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              tooltip: 'Logout',
+              onPressed: (){
+                setState(() {
+                  name = '';
+                  password = '';
+                  isLoggedIn = false;
+                });
+                Navigator.pop(context);
+              },
+            )
+          ],
+          backgroundColor: c1,
+        ),
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -1021,14 +1020,15 @@ class _ListPageState extends State<ListPage> {
               lowerHalf(context),
             ],
           ),
+          physics: NeverScrollableScrollPhysics(),
         ),
           bottomNavigationBar: BottomNavigationBar(
               fixedColor: c1,
               onTap: _onItemTapped,
               currentIndex: _selectedIndex,
               items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('메인 화면')),
-                BottomNavigationBarItem(icon: Icon(Icons.list), title: Text('영수증 목록'))
+                BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Main')),
+                BottomNavigationBarItem(icon: Icon(Icons.list), title: Text('List'))
               ]),
       )
     );
@@ -1051,13 +1051,13 @@ class _ListPageState extends State<ListPage> {
   }
   Widget top(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top:50.0),
+      margin: EdgeInsets.only(top:20.0),
       height: screenHeight / 10,
       child: Column(
           children:<Widget>[
             Text(
-              "목록 조회",
-              style: TextStyle(color: Colors.black, fontSize: 30),
+              "Search List",
+              style: TextStyle(fontSize: 30),
             )
           ],
           mainAxisAlignment: MainAxisAlignment.spaceEvenly
@@ -1069,15 +1069,89 @@ class _ListPageState extends State<ListPage> {
       height: screenHeight/10,
       child: Row(
         children: <Widget>[
-          RaisedButton(
-            child: Text('하루',style: TextStyle(fontSize: 12),),
+          Container(
+              width: 100,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end:Alignment.bottomRight,
+                      colors:[c1,c2]
+                  )
+              ),
+              height: 50.0,
+              child: GestureDetector(
+                onTap: () {
+
+                },
+                child: Material(
+                  color: transparent,
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Center(
+                    child: Text('1day',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Montserrat'
+                      ),
+                    ),
+                  ),
+                ),)
+          ),Container(
+              width: 100,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end:Alignment.bottomRight,
+                      colors:[c1,c2]
+                  )
+              ),
+              height: 50.0,
+              child: GestureDetector(
+                onTap: () {
+
+                },
+                child: Material(
+                  color: transparent,
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Center(
+                    child: Text('1week',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Montserrat'
+                      ),
+                    ),
+                  ),
+                ),)
           ),
-          RaisedButton(
-            child: Text('1주일',style: TextStyle(fontSize: 12),),
+          Container(
+              width: 100,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end:Alignment.bottomRight,
+                      colors:[c1,c2]
+                  )
+              ),
+              height: 50.0,
+              child: GestureDetector(
+                onTap: () {
+
+                },
+                child: Material(
+                  color: transparent,
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Center(
+                    child: Text('1month',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Montserrat'
+                      ),
+                    ),
+                  ),
+                ),)
           ),
-          RaisedButton(
-            child: Text('1달',style: TextStyle(fontSize: 12),),
-          )
         ],
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
@@ -1099,13 +1173,25 @@ class _ListPageState extends State<ListPage> {
               ).then((date){
                 setState(() {
                   _dateTime1 = date;
+                  Date1.text = format.format(_dateTime1).toString();
                 });
               });
             },
           ),
-          Text(_dateTime1 == null ? '                    ' : format.format(_dateTime1).toString(),
-            style: TextStyle(decoration: TextDecoration.underline,
-              decorationColor: Colors.black,
+          Container(
+            width:100,
+            child:TextField(
+              controller: Date1,
+              decoration: InputDecoration(
+                labelStyle: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey
+                ),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: c1)
+                ),
+              ),
             ),
           ),
           Text("~"),
@@ -1120,18 +1206,55 @@ class _ListPageState extends State<ListPage> {
               ).then((date){
                 setState(() {
                   _dateTime2 = date;
+                  Date2.text =  format.format(_dateTime2).toString();
                 });
               });
             },
           ),
-          Text(_dateTime2 == null ? '                    ' : format.format(_dateTime2).toString(),
-            style: TextStyle(decoration: TextDecoration.underline,
-              decorationColor: Colors.black,
+          Container(
+            width:100,
+            child:TextField(
+              controller: Date2,
+              decoration: InputDecoration(
+                labelStyle: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey
+                ),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: c1)
+                ),
+              ),
             ),
           ),
-          RaisedButton(
-            child: Text('검색',style: TextStyle(fontSize: 12),),
-          )
+          Container(
+              width: 100,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end:Alignment.bottomRight,
+                      colors:[c1,c2]
+                  )
+              ),
+              height: 50.0,
+              child: GestureDetector(
+                onTap: () {
+
+                },
+                child: Material(
+                  color: transparent,
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Center(
+                    child: Text('Search',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Montserrat'
+                      ),
+                    ),
+                  ),
+                ),)
+          ),
         ],
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
@@ -1140,7 +1263,16 @@ class _ListPageState extends State<ListPage> {
   Widget lowerHalf(BuildContext context) {
     return Container(
       height: 7*(screenHeight/10),
-      child: RandomWords(),
+      child: FutureBuilder<List<Result>>(
+        future: fetchResults(http.Client()),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) print(snapshot.error);
+
+          return snapshot.hasData
+              ? ResultsList(Results: snapshot.data)
+              : Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
   Future<bool> _backPressed(){
@@ -1150,84 +1282,69 @@ class _ListPageState extends State<ListPage> {
    _selectedIndex = 0;
    false;
   }
+
+}
+//리스트 주소 기본임
+Future<List<Result>> fetchResults(http.Client client) async {
+  final response =
+  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/'+username.trim()+'/');
+  // compute 함수를 사용하여 parsePhotos를 별도 isolate에서 수행합니다.
+  return compute(parseResults, response.body);
 }
 
-//목록에 넣을게 없어서 일단은 집어넣은 것 크게 신경 안써두 되는 부분. 이 부분은 나중에 수정해서 상세보기에 스크롤로 들어감
-class RandomWordsState extends State<RandomWords>{
-  final _suggestions = <WordPair>[];
-  final _biggerFont = const TextStyle(fontSize: 18);
+List<Result> parseResults(String responseBody) {
+  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+
+  return parsed.map<Result>((json) => Result.fromJson(json)).toList();
+}
+
+//결과 값 넣는 것
+class Result {
+  final int id;
+  final int user;
+  final String receipt_img_url;
+  final String receipt_date;
+
+  Result({this.id, this.user, this.receipt_img_url, this.receipt_date});
+
+  factory Result.fromJson(Map<String, dynamic> json) {
+    return Result(
+      id: json['id'] as int,
+      user: json['user'] as int,
+      receipt_img_url: json['receipt_img_url'] as String,
+      receipt_date: json['receipt_date'] as String,
+    );
+  }
+}
+
+//리스트 출력 부분 리스트 뷰로 스크롤 가능
+class ResultsList extends StatelessWidget {
+  final List<Result> Results;
+
+  ResultsList({Key key, this.Results}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildSuggestions(),
-    );
-  }
-  Widget _buildSuggestions() {
     return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: /*1*/ (context, i) {
-          if (i.isOdd) return Divider(); /*2*/
-
-          final index = i ~/ 2; /*3*/
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10)); /*4*/
-          }
-          return _buildRow(_suggestions[index]);
-        });
-  }
-  Widget _buildRow(WordPair pair) {
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: Image.asset('lib/assets/cal.png'),
-      subtitle: Text('2020-03-04'),
-      onLongPress: () => _showDialog()
-    );
-  }
-  //상세보기 목록으로 들어가는 부분 이미지로 들어감
- void _showDialog() {
-    SlideDialog.showSlideDialog(
-      context: context,
-      child: Image.asset('lib/assets/cal.png'),
-      barrierColor: Colors.white.withOpacity(0.7),
-      pillColor: Colors.green,
-      backgroundColor: Colors.white,
-    );
-  }
-
-  /*void _showDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10.0))
-            ),
-            contentPadding: EdgeInsets.all(0.0),
-            title: const Text('상세보기'),
-            content: new Container(
-                child: Image.asset(
-                    'lib/assets/cal.png'
-                )
-            ),
-            actions:<Widget>[
-              new FlatButton(
-                  onPressed: (){
-                    Navigator.of(context).pop();
-                  },
-                  textColor:Theme.of(context).primaryColor,
-                  child: const Text('닫기'))
-            ]
+      itemCount: Results.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+            title: Text('영수증'),
+            trailing: Image.network(Results[index].receipt_img_url),
+            subtitle: Text(Results[index].receipt_date.substring(0,10)),
+            onLongPress: () => {
+            SlideDialog.showSlideDialog(
+              context: context,
+            child: Image.network(Results[index].receipt_img_url),
+            barrierColor: Colors.white.withOpacity(0.7),
+            pillColor: Colors.green,
+            backgroundColor: Colors.white,
+            )
+            }
         );
       },
     );
-  }*/
+  }
 }
 
-class RandomWords extends StatefulWidget{
-  @override
-  RandomWordsState createState() => RandomWordsState();
-}
+

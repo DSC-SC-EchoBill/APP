@@ -71,3 +71,10 @@ Map<String, dynamic> _$check_user_linkToJson(check_user_link instance) =>
     <String, dynamic>{
       'username': instance.username,
     };
+
+SearchList _$SearchListFromJson(Map<String, dynamic> json) {
+  return SearchList();
+}
+
+Map<String, dynamic> _$SearchListToJson(SearchList instance) =>
+    <String, dynamic>{};

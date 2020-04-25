@@ -48,3 +48,10 @@ class check_user_link{
   factory check_user_link.fromJson(Map<String, dynamic> json) => _$check_user_linkFromJson(json);
   Map<String, dynamic> toJson() => _$check_user_linkToJson(this);
 }
+
+@JsonSerializable()
+class SearchList{
+  SearchList();
+  factory SearchList.fromJson(Map<String, dynamic> json) => _$SearchListFromJson(json);
+  Map<String, dynamic> toJson() => _$SearchListToJson(this);
+}
