@@ -27,12 +27,14 @@ import 'package:load/load.dart';
 import 'package:link/link.dart';
 import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 void main() => runApp(
     MyApp(),
 );
 
 String username= "";
+String TMoney = "";
 
 Color c1 = const Color.fromRGBO(164, 205, 57, 100);
 Color c2 = const Color.fromRGBO(208, 222, 63, 100);
@@ -64,6 +66,7 @@ class _LoginpageState extends State<Loginpage> {
   TextEditingController Password = new TextEditingController();
   TextEditingController Id = new TextEditingController();
   static const Color transparent = Color(0x00000000);
+  double screenHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -78,17 +81,17 @@ class _LoginpageState extends State<Loginpage> {
             child:Column(
               children: <Widget>[
                 Container(
-                    padding: EdgeInsets.only(left: 70,right: 70,top:90),
+                    padding: EdgeInsets.only(left: 70,right: 70,top:50),
                     child: Column(
                       children: <Widget>[
                         SizedBox(height: 100.0),
                         Image.asset('lib/assets/login_logo2.png',),
-                        SizedBox(height: 50.0),
+                        SizedBox(height: 40.0),
                       ],
                     )
       ),
                 Container(
-                    padding: EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
+                    padding: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
                     child: Column(
                       children: <Widget>[
                         TextField(
@@ -530,9 +533,6 @@ class _IDPWState extends State<IDPW> {
 
 
 class MainPage extends StatefulWidget {
-  final List<Result> Results;
-  static const Color transparent = Color(0x00000000);
-  MainPage({Key key, this.Results}) : super(key: key);
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -582,37 +582,21 @@ class _MainPageState extends State<MainPage> {
   initState(){
     print(username);
     super.initState();
-    Money.text = '0';
   }
 
   Widget top(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(top:20.0),
       height: screenHeight / 5,
-      child: Column(
-          children:<Widget>[
-            Container(
-              child: TextField(
-                textAlign: TextAlign.center,
-                    controller: Money,
-                    autofocus: false,
-                    enabled: false,
-                    decoration: new InputDecoration(
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
-                    ),
-                style:TextStyle(
-                  fontSize: 40,
-                  height: 2
-                )
-                  ),
-              ),
-          ],
-          mainAxisAlignment: MainAxisAlignment.center
+      child: FutureBuilder<List<MoneyResult>>(
+        future: fetchResultsTotalMoney(http.Client()),
+        builder: (context,snap) {
+          if (snap.hasError) print("error : "+snap.error.toString());
+          print("wwwwwwwwwwww"+fetchResultsTotalMoney(http.Client()).toString());
+          return snap.hasData
+              ? Top(MoneyResults: snap.data)
+              : Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }
@@ -690,7 +674,7 @@ class _MainPageState extends State<MainPage> {
         future: fetchResults(http.Client()),
         builder: (context, snapshot) {
           if (snapshot.hasError) print(snapshot.error);
-
+          print("wwww"+snapshot.hasData.toString());
           return snapshot.hasData
               ? ResultsList(Results: snapshot.data)
               : Center(child: CircularProgressIndicator());
@@ -1165,29 +1149,25 @@ Future<List<Result>> fetchResults(http.Client client) async {
   return compute(parseResults, response.body);
 }
 
-Future<List<Result>> fetchResultsTotalMoney(http.Client client) async {
+
+Future<List<MoneyResult>> fetchResultsTotalMoney(http.Client client) async {
   final response =
   await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/');
-  // compute 함수를 사용하여 parsePhotos를 별도 isolate에서 수행합니다.
-  return compute(parseResults, response.body);
-}
 
-Future<List<Result>> SearchList(http.Client client) async {
-  final response =
-  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/'+month+'/');
-  return compute(parseResults, response.body);
-}
-
-Future<List<Result>> DesignateListFromJson(http.Client client) async {
-  final response =
-  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/'+datevar1+'/'+datevar2+'/');
-  return compute(parseResults, response.body);
+  print(response.body);
+  return compute(parseMoneyResult,response.body);
 }
 
 List<Result> parseResults(String responseBody) {
   final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
 
   return parsed.map<Result>((json) => Result.fromJson(json)).toList();
+}
+
+List<MoneyResult> parseMoneyResult(String responseBody) {
+  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+
+  return parsed.map<MoneyResult>((json) => MoneyResult.fromJson(json)).toList();
 }
 
 //결과 값 넣는 것
@@ -1225,6 +1205,47 @@ class MoneyResult {
   }
 }
 
+
+class Top extends StatelessWidget {
+  final List<MoneyResult> MoneyResults;
+  static const Color transparent = Color(0x00000000);
+
+  Top({Key key, this.MoneyResults}) : super(key: key);
+  double screenHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: screenHeight / 5,
+      child: Container(
+                                      child: TextField(
+                                          textAlign: TextAlign.center,
+                                          controller: TextEditingController()..text = MoneyResults[0].total_price__sum.toString(),
+                                          autofocus: false,
+                                          enabled: false,
+                                          decoration: new InputDecoration(
+                                            border: InputBorder.none,
+                                            focusedBorder: InputBorder.none,
+                                            enabledBorder: InputBorder.none,
+                                            errorBorder: InputBorder.none,
+                                            disabledBorder: InputBorder.none,
+                                            contentPadding: EdgeInsets.only(
+                                                left: 15,
+                                                bottom: 11,
+                                                top: 11,
+                                                right: 15),
+                                          ),
+                                          style: TextStyle(
+                                              fontSize: 40,
+                                              height: 2
+                                          )
+                                      ),
+                                    ),
+                              );
+  }
+}
+
+
 //리스트 출력 부분 리스트 뷰로 스크롤 가능
 class ResultsList extends StatelessWidget {
   final List<Result> Results;
@@ -1234,7 +1255,7 @@ class ResultsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: Results.length,// < 8 ? 8 : Results.length,
+      itemCount: Results.length,
       itemBuilder: (context, index) {
         return Container(
           color: transparent,
@@ -1267,3 +1288,5 @@ class ResultsList extends StatelessWidget {
     );
   }
 }
+
+
