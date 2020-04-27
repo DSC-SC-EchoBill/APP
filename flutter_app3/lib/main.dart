@@ -1180,7 +1180,7 @@ Future<List<Result>> SearchList(http.Client client) async {
 
 Future<List<Result>> DesignateListFromJson(http.Client client) async {
   final response =
-  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/'+date1+'/'+date2+'/');
+  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/'+datevar1+'/'+datevar2+'/');
   return compute(parseResults, response.body);
 }
 

@@ -85,13 +85,13 @@ Map<String, dynamic> _$SearchListToJson(SearchList instance) =>
 
 DesignateList _$DesignateList(Map<String, dynamic> json) {
   return DesignateList(
-    json['date1'] as String,
-    json['date2'] as String,
+    json['datevar1'] as String,
+    json['datevar2'] as String,
   );
 }
 
 Map<String, dynamic> _$DesignateListFromJson(DesignateList instance) =>
     <String, dynamic>{
-      'date1' : instance.date1,
-      'date2' : instance.date2,
+      'datevar1' : instance.date1,
+      'datevar2' : instance.date2,
     };

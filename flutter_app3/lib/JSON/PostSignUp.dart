@@ -12,7 +12,6 @@ class PostSignUp{
 
   factory PostSignUp.fromJson(Map<String, dynamic> json) => _$PostSignUpFromJson(json);
   Map<String, dynamic> toJson() => _$PostSignUpToJson(this);
-
 }
 
 @JsonSerializable()
@@ -59,9 +58,9 @@ class SearchList{
 
 @JsonSerializable()
 class DesignateList{
-  DesignateList(this.date1, this.date2);
-  String date1;
-  String date2;
+  DesignateList(this.datevar1, this.datevar2);
+  String datevar1;
+  String datevar2;
   factory DesignateList.fromJson(Map<String, dynamic> json) => _$DesignateListFromJson(json);
   Map<String, dynamic> toJson() => _$DesignateListToJson(this);
 }
