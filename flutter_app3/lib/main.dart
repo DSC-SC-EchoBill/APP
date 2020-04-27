@@ -27,7 +27,6 @@ import 'package:load/load.dart';
 import 'package:link/link.dart';
 import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 
 void main() => runApp(
     MyApp(),
@@ -1173,6 +1172,18 @@ Future<List<Result>> fetchResultsTotalMoney(http.Client client) async {
   return compute(parseResults, response.body);
 }
 
+Future<List<Result>> SearchList(http.Client client) async {
+  final response =
+  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/'+month+'/');
+  return compute(parseResults, response.body);
+}
+
+Future<List<Result>> DesignateListFromJson(http.Client client) async {
+  final response =
+  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/'+date1+'/'+date2+'/');
+  return compute(parseResults, response.body);
+}
+
 List<Result> parseResults(String responseBody) {
   final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
 
@@ -1256,5 +1267,3 @@ class ResultsList extends StatelessWidget {
     );
   }
 }
-
-

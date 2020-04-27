@@ -51,7 +51,17 @@ class check_user_link{
 
 @JsonSerializable()
 class SearchList{
-  SearchList();
+  SearchList(this.month);
+  int month;
   factory SearchList.fromJson(Map<String, dynamic> json) => _$SearchListFromJson(json);
   Map<String, dynamic> toJson() => _$SearchListToJson(this);
+}
+
+@JsonSerializable()
+class DesignateList{
+  DesignateList(this.date1, this.date2);
+  String date1;
+  String date2;
+  factory DesignateList.fromJson(Map<String, dynamic> json) => _$DesignateListFromJson(json);
+  Map<String, dynamic> toJson() => _$DesignateListToJson(this);
 }
