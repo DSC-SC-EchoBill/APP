@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:flutterapp3/UI/CustomInputField.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,7 +33,6 @@ void main() => runApp(
     MyApp(),
 );
 
-int _selectedIndex = 0; // 네비게이션 바 체크
 String username= "";
 
 Color c1 = const Color.fromRGBO(164, 205, 57, 100);
@@ -48,7 +49,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Loginpage(),
-      theme : ThemeData(fontFamily: 'KoPubWorld'),
+      theme : ThemeData(fontFamily: 'KoPubWorld',primaryColor:Colors.green),
     );
   }
 }
@@ -67,7 +68,9 @@ class _LoginpageState extends State<Loginpage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
       resizeToAvoidBottomPadding: false,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,6 +125,28 @@ class _LoginpageState extends State<Loginpage> {
                         ),
 
                         SizedBox(height: 5.0),
+                        Container(
+                          child: Row(
+                            children: <Widget>[
+                              Container(
+                                child: Checkbox(
+                                  value:isLoggedIn,
+                                  onChanged: (bool value){
+                                    check_box(value);
+                                    setState(() {
+                                      isLoggedIn = value;
+                                      print(isLoggedIn);
+                                    });
+                                  },
+                                ),
+                              ),
+                              Container(
+                                child:Text('auto login')
+                              )
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 5.0,),
                         Container(
                           alignment: Alignment(1.0, 0.0),
                           padding: EdgeInsets.only(top: 15.0, left: 20.0),
@@ -210,6 +235,7 @@ class _LoginpageState extends State<Loginpage> {
           ),
         ],
       ),
+    )
     );
   }
 
@@ -252,10 +278,11 @@ class _LoginpageState extends State<Loginpage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String userId = prefs.getString('username');
     final String userPassword = prefs.getString('userpassword');
-
-    if (userId != null) {
+    final bool isLoggin = prefs.getBool('isLoggin');
+    print("dsadas $isLoggedIn");
+    if (isLoggin==true) {
       setState(() {
-        isLoggedIn = true;
+        isLoggedIn = isLoggin;
         name = userId;
         password = userPassword;
         Id = new TextEditingController(text: name);
@@ -264,6 +291,11 @@ class _LoginpageState extends State<Loginpage> {
       });
       return;
     }
+  }
+
+  Future<Null> check_box(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isLoggin', value);
   }
 
   Future<Null> logout() async {
@@ -282,12 +314,17 @@ class _LoginpageState extends State<Loginpage> {
     setState(() {
       name = Id.text;
       password = Password.text;
-      isLoggedIn = true;
     });
 
     Id.clear();
     Password.clear();
   }
+
+  Future<bool> _onBackPressed(){
+    exit(0);
+    false;
+  }
+
 
 }
 
@@ -494,109 +531,51 @@ class _IDPWState extends State<IDPW> {
 
 
 class MainPage extends StatefulWidget {
+  final List<Result> Results;
+  static const Color transparent = Color(0x00000000);
+  MainPage({Key key, this.Results}) : super(key: key);
+
   @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  String barcode= ""; //qr 바코드 주소
+
   double screenHeight;
+  DateTime _dateTime1; //상세보기 날짜
+  DateTime _dateTime2; //상세보기 날짜 2
+  final format = DateFormat("yyyy-MM-dd"); //날짜 형식
+
+  static const Color transparent = Color(0x00000000);
+
+  TextEditingController Date1 = new TextEditingController();
+  TextEditingController Date2 = new TextEditingController();
+  TextEditingController Money = new TextEditingController();
+  TextEditingController Won = new TextEditingController();
+  String barcode= ""; //qr 바코드 주소
   final scaffoldkey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
-    return WillPopScope(
-      onWillPop: _backPressed,
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
-          title: const Text('Eco Bill'),
-            actions: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
-                  tooltip: 'Logout',
-                onPressed: (){
-                  setState(() {
-                    isLoggedIn = false;
-                  });
-                  Navigator.pop(context);
-                },
-              )
-            ],
-          backgroundColor: c1,
+          title: Image.asset('lib/assets/login_logo2.png',width: 100,),
+          backgroundColor: Colors.white,
+          automaticallyImplyLeading: false,
         ),
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              upperHalf(context),
+              top(context),
+              search1(context),
               lowerHalf(context),
             ],
           ),physics: NeverScrollableScrollPhysics(),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-            onTap: _onItemTapped,
-            currentIndex: _selectedIndex,
-            fixedColor: c1,
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Main')),
-              BottomNavigationBarItem(icon: Icon(Icons.list), title: Text('List'))
-            ]),
           floatingActionButton: new FloatingActionButton(
-              backgroundColor: c1,
+              backgroundColor: Colors.indigo,
               onPressed: scan,
               child: Icon(Icons.camera)),
-      )
-    );
-  }
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      switch(_selectedIndex){
-        case 0:
-          Navigator.push(context,
-              FadeRoute(page: MainPage())
-          );
-          break;
-        case 1:
-          Navigator.push(context,
-            FadeRoute(page:ListPage())
-          );
-      }
-    });
-  }
-  // 상단 이미지 로고 자리
-  Widget upperHalf(BuildContext context) {
-    return Container(
-      height: screenHeight / 2,
-      child: Image.asset(
-        'lib/assets/DSC.png',
-        fit: BoxFit.cover,
-      ),
-    );
-  }
-
-  //하단 버튼 자리
-  Widget lowerHalf(BuildContext context) {
-    return Container(
-      height: screenHeight/2,
-      child: Row(
-        children: <Widget>[
-          RaisedButton(
-              child:Text('목록 조회',style: TextStyle(fontSize: 24),),
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute<void>(builder: (BuildContext context){
-                      return ListPage();
-                    })
-                );
-              }
-          ),
-          RaisedButton(
-            child:Text('QR 인식',style: TextStyle(fontSize: 24),),
-            onPressed: scan,
-          )
-        ],
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      ),
     );
   }
 
@@ -604,6 +583,229 @@ class _MainPageState extends State<MainPage> {
   initState(){
     print(username);
     super.initState();
+    Money.text = '0';
+  }
+
+  Widget top(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top:20.0),
+      height: screenHeight / 5,
+      child: Column(
+          children:<Widget>[
+            Container(
+              child: TextField(
+                textAlign: TextAlign.center,
+                    controller: Money,
+                    autofocus: false,
+                    enabled: false,
+                    decoration: new InputDecoration(
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
+                    ),
+                style:TextStyle(
+                  fontSize: 40,
+                  height: 2
+                )
+                  ),
+              ),
+          ],
+          mainAxisAlignment: MainAxisAlignment.center
+      ),
+    );
+  }
+  Widget search1(BuildContext context){
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(40),topRight: Radius.circular(40)),
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end:Alignment.bottomRight,
+              colors:[c1,c1]
+          )
+      ),
+      height: screenHeight/14,
+      child: Row(
+              children:<Widget>[
+          Container(
+              width: 50,
+              decoration: BoxDecoration(
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  print("touch");
+                },
+                child: Material(
+                  color: transparent,
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Center(
+                    child: Text('Month',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontFamily: 'Montserrat'
+                      ),
+                    ),
+                  ),
+                ),)
+          ),
+          Container(
+              width: 70,
+              child: GestureDetector(
+                onTap: () {
+                  print("touch");
+                },
+                child: Material(
+                  color: transparent,
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Center(
+                    child: Text('Newest',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontFamily: 'Montserrat'
+                      ),
+                    ),
+                  ),
+                ),)
+          ),
+                IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    Select_date(context);
+                  }
+                )
+        ],
+        mainAxisAlignment: MainAxisAlignment.end,
+      ),
+    );
+  }
+  Widget lowerHalf(BuildContext context) {
+    return Container(
+      color: Colors.grey,
+      height: 7*(screenHeight/10),
+      child: FutureBuilder<List<Result>>(
+        future: fetchResults(http.Client()),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) print(snapshot.error);
+
+          return snapshot.hasData
+              ? ResultsList(Results: snapshot.data)
+              : Center(child: CircularProgressIndicator());
+        },
+      ),
+    );
+  }
+
+  Future<void> Select_date(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Choose Date',textAlign: TextAlign.center,),
+          content: Container(
+            height: 90,
+            child: Column(
+              children: <Widget>[
+                Container(
+                  child:Row(
+                   children: <Widget>[
+                     IconButton(
+                       icon: Icon(Icons.calendar_today),
+                       onPressed: (){
+                         showDatePicker(
+                             context: context,
+                             initialDate: DateTime.now(),
+                             firstDate: DateTime(2001),
+                             lastDate: DateTime(2021)
+                         ).then((date){
+                           setState(() {
+                             _dateTime1 = date;
+                             Date1.text = format.format(_dateTime1).toString();
+                           });
+                         });
+                       },
+                     ),
+                     Container(
+                       width:70,
+                       child:TextField(
+                         style:TextStyle(
+                             fontSize: 10,
+                         ),
+                         controller: Date1,
+                         autofocus: false,
+                         enabled: false,
+                         decoration: InputDecoration(
+                           labelStyle: TextStyle(
+                               fontFamily: 'Montserrat',
+                               fontWeight: FontWeight.bold,
+                               color: Colors.grey
+                           ),
+                           focusedBorder: UnderlineInputBorder(
+                               borderSide: BorderSide(color: c1)
+                           ),
+                         ),
+                       ),
+                     ),
+                     Text("~"),
+                     IconButton(
+                       icon: Icon(Icons.calendar_today),
+                       onPressed: (){
+                         showDatePicker(
+                             context: context,
+                             initialDate: DateTime.now(),
+                             firstDate: DateTime(2001),
+                             lastDate: DateTime(2021)
+                         ).then((date){
+                           setState(() {
+                             _dateTime2 = date;
+                             Date2.text =  format.format(_dateTime2).toString();
+                           });
+                         });
+                       },
+                     ),
+                     Container(
+                       width:70,
+                       child:TextField(
+                         style:TextStyle(
+                           fontSize: 10,
+                         ),
+                         controller: Date2,
+                         autofocus: false,
+                         enabled: false,
+                         decoration: InputDecoration(
+                           labelStyle: TextStyle(
+                               fontFamily: 'Montserrat',
+                               fontWeight: FontWeight.bold,
+                               color: Colors.grey
+                           ),
+                           focusedBorder: UnderlineInputBorder(
+                               borderSide: BorderSide(color: c1)
+                           ),
+                         ),
+                       ),
+                     ),
+                   ],
+                  )
+                )
+              ],
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            )
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Search'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   //qr인식
@@ -662,7 +864,7 @@ class _MainPageState extends State<MainPage> {
                           child: Material(
                               borderRadius: BorderRadius.circular(20.0),
                               shadowColor: Colors.greenAccent,
-                              color: Colors.green,
+                              color: c1,
                               elevation: 7.0,
                                 child: Center(
                                   child: Text('저장하기',
@@ -687,7 +889,7 @@ class _MainPageState extends State<MainPage> {
                             child: Material(
                                 borderRadius: BorderRadius.circular(20.0),
                                 shadowColor: Colors.greenAccent,
-                                color: Colors.green,
+                                color: c1,
                                 elevation: 7.0,
                                   child: Center(
                                     child: Text('나가기',
@@ -724,16 +926,8 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  Future<bool> _backPressed(){
-    Navigator.push(context,
-        FadeRoute(page: Loginpage())
-    );
-    _selectedIndex = 0;
-    false;
-  }
-
   Future<http.Response> postRequest(String Url) async {
-    var url = Url.toString();
+    var url = Url.toString()+'/';
     check_user_link c = new check_user_link(username);
     var body = jsonEncode(c.toJson());
     print("Body : " + body);
@@ -964,330 +1158,17 @@ class _RegisterState extends State<Register> {
 
 }
 
-class ListPage extends StatefulWidget {
-  @override
-  _ListPageState createState() => _ListPageState();
-}
-
-// 상세보기 페이지
-class _ListPageState extends State<ListPage> {
-  // To adjust the layout according to the screen size
-  // so that our layout remains responsive ,we need to
-  // calculate the screen height
-  double screenHeight;
-  DateTime _dateTime1; //상세보기 날짜
-  DateTime _dateTime2; //상세보기 날짜 2
-  final format = DateFormat("yyyy-MM-dd"); //날짜 형식
-
-  final _suggestions = <WordPair>[];
-  final _biggerFont = const TextStyle(fontSize: 18);
-
-  static const Color transparent = Color(0x00000000);
-
-  TextEditingController Date1 = new TextEditingController();
-  TextEditingController Date2 = new TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    return WillPopScope(
-      onWillPop: _backPressed,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Eco Bill'),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.arrow_back_ios),
-              tooltip: 'Logout',
-              onPressed: (){
-                setState(() {
-                  name = '';
-                  password = '';
-                  isLoggedIn = false;
-                });
-                Navigator.pop(context);
-              },
-            )
-          ],
-          backgroundColor: c1,
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              top(context),
-              search1(context),
-              search2(context),
-              lowerHalf(context),
-            ],
-          ),
-          physics: NeverScrollableScrollPhysics(),
-        ),
-          bottomNavigationBar: BottomNavigationBar(
-              fixedColor: c1,
-              onTap: _onItemTapped,
-              currentIndex: _selectedIndex,
-              items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Main')),
-                BottomNavigationBarItem(icon: Icon(Icons.list), title: Text('List'))
-              ]),
-      )
-    );
-  }
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      switch(_selectedIndex){
-        case 0:
-          Navigator.push(context,
-              FadeRoute(page: MainPage())
-          );
-          break;
-        case 1:
-          Navigator.push(context,
-              FadeRoute(page:ListPage())
-          );
-      }
-    });
-  }
-  Widget top(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top:20.0),
-      height: screenHeight / 10,
-      child: Column(
-          children:<Widget>[
-            Text(
-              "Search List",
-              style: TextStyle(fontSize: 30),
-            )
-          ],
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly
-      ),
-    );
-  }
-  Widget search1(BuildContext context){
-    return Container(
-      height: screenHeight/10,
-      child: Row(
-        children: <Widget>[
-          Container(
-              width: 100,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end:Alignment.bottomRight,
-                      colors:[c1,c2]
-                  )
-              ),
-              height: 50.0,
-              child: GestureDetector(
-                onTap: () {
-
-                },
-                child: Material(
-                  color: transparent,
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: Center(
-                    child: Text('1day',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Montserrat'
-                      ),
-                    ),
-                  ),
-                ),)
-          ),Container(
-              width: 100,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end:Alignment.bottomRight,
-                      colors:[c1,c2]
-                  )
-              ),
-              height: 50.0,
-              child: GestureDetector(
-                onTap: () {
-
-                },
-                child: Material(
-                  color: transparent,
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: Center(
-                    child: Text('1week',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Montserrat'
-                      ),
-                    ),
-                  ),
-                ),)
-          ),
-          Container(
-              width: 100,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end:Alignment.bottomRight,
-                      colors:[c1,c2]
-                  )
-              ),
-              height: 50.0,
-              child: GestureDetector(
-                onTap: () {
-
-                },
-                child: Material(
-                  color: transparent,
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: Center(
-                    child: Text('1month',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Montserrat'
-                      ),
-                    ),
-                  ),
-                ),)
-          ),
-        ],
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      ),
-    );
-  }
-  Widget search2(BuildContext context){
-    return Container(
-      height: screenHeight/10,
-      child: Row(
-        children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.calendar_today),
-            onPressed: (){
-              showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2001),
-                  lastDate: DateTime(2021)
-              ).then((date){
-                setState(() {
-                  _dateTime1 = date;
-                  Date1.text = format.format(_dateTime1).toString();
-                });
-              });
-            },
-          ),
-          Container(
-            width:100,
-            child:TextField(
-              controller: Date1,
-              decoration: InputDecoration(
-                labelStyle: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey
-                ),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: c1)
-                ),
-              ),
-            ),
-          ),
-          Text("~"),
-          IconButton(
-            icon: Icon(Icons.calendar_today),
-            onPressed: (){
-              showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2001),
-                  lastDate: DateTime(2021)
-              ).then((date){
-                setState(() {
-                  _dateTime2 = date;
-                  Date2.text =  format.format(_dateTime2).toString();
-                });
-              });
-            },
-          ),
-          Container(
-            width:100,
-            child:TextField(
-              controller: Date2,
-              decoration: InputDecoration(
-                labelStyle: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey
-                ),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: c1)
-                ),
-              ),
-            ),
-          ),
-          Container(
-              width: 100,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end:Alignment.bottomRight,
-                      colors:[c1,c2]
-                  )
-              ),
-              height: 50.0,
-              child: GestureDetector(
-                onTap: () {
-
-                },
-                child: Material(
-                  color: transparent,
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: Center(
-                    child: Text('Search',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Montserrat'
-                      ),
-                    ),
-                  ),
-                ),)
-          ),
-        ],
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      ),
-    );
-  }
-  Widget lowerHalf(BuildContext context) {
-    return Container(
-      height: 7*(screenHeight/10),
-      child: FutureBuilder<List<Result>>(
-        future: fetchResults(http.Client()),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) print(snapshot.error);
-
-          return snapshot.hasData
-              ? ResultsList(Results: snapshot.data)
-              : Center(child: CircularProgressIndicator());
-        },
-      ),
-    );
-  }
-  Future<bool> _backPressed(){
-    Navigator.push(context,
-        FadeRoute(page: MainPage())
-    );
-   _selectedIndex = 0;
-   false;
-  }
-
-}
 //리스트 주소 기본임
 Future<List<Result>> fetchResults(http.Client client) async {
   final response =
   await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/'+username.trim()+'/');
+  // compute 함수를 사용하여 parsePhotos를 별도 isolate에서 수행합니다.
+  return compute(parseResults, response.body);
+}
+
+Future<List<Result>> fetchResultsTotalMoney(http.Client client) async {
+  final response =
+  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/');
   // compute 함수를 사용하여 parsePhotos를 별도 isolate에서 수행합니다.
   return compute(parseResults, response.body);
 }
@@ -1304,8 +1185,10 @@ class Result {
   final int user;
   final String receipt_img_url;
   final String receipt_date;
+  final int total_price;
+  final String device_id;
 
-  Result({this.id, this.user, this.receipt_img_url, this.receipt_date});
+  Result({this.id, this.user, this.receipt_img_url, this.receipt_date, this.total_price, this.device_id});
 
   factory Result.fromJson(Map<String, dynamic> json) {
     return Result(
@@ -1313,6 +1196,20 @@ class Result {
       user: json['user'] as int,
       receipt_img_url: json['receipt_img_url'] as String,
       receipt_date: json['receipt_date'] as String,
+      total_price: json['total_price'] as int,
+      device_id: json['device_id'] as String,
+    );
+  }
+}
+
+class MoneyResult {
+  final int total_price__sum;
+
+  MoneyResult({this.total_price__sum});
+
+  factory MoneyResult.fromJson(Map<String, dynamic> json) {
+    return MoneyResult(
+      total_price__sum: json['total_price__sum'] as int,
     );
   }
 }
@@ -1320,27 +1217,40 @@ class Result {
 //리스트 출력 부분 리스트 뷰로 스크롤 가능
 class ResultsList extends StatelessWidget {
   final List<Result> Results;
-
+  static const Color transparent = Color(0x00000000);
   ResultsList({Key key, this.Results}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: Results.length,
+      itemCount: Results.length,// < 8 ? 8 : Results.length,
       itemBuilder: (context, index) {
-        return ListTile(
-            title: Text('영수증'),
-            trailing: Image.network(Results[index].receipt_img_url),
-            subtitle: Text(Results[index].receipt_date.substring(0,10)),
+        return Container(
+          color: transparent,
+          child: ListTile(
+            title: Container(
+              height: 60,
+              child: Row(
+                children: <Widget>[
+                  Text(Results[index].receipt_date.substring(5,10)),
+                  SizedBox(width: 100,),
+                  Text(Results[index].device_id.toString())
+                ],
+              ),
+            ),
+            trailing: Image.network(Results.length > index ? Results[index].receipt_img_url : ""),
             onLongPress: () => {
             SlideDialog.showSlideDialog(
               context: context,
-            child: Image.network(Results[index].receipt_img_url),
-            barrierColor: Colors.white.withOpacity(0.7),
-            pillColor: Colors.green,
-            backgroundColor: Colors.white,
+              child: Expanded(
+                child:Image.network(Results.length > index ? Results[index].receipt_img_url : "",fit: BoxFit.fill,),
+              ),
+              barrierColor: Colors.white.withOpacity(0.7),
+              pillColor: c1,
+              backgroundColor: Colors.white,
             )
-            }
+            },
+          )
         );
       },
     );
