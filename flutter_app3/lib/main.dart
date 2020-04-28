@@ -254,7 +254,7 @@ class _LoginpageState extends State<Loginpage> {
       if (response.statusCode == 200) {
         Fluttertoast.showToast(msg: '로그인 성공!');
         setState(() {
-          username = Id.text;
+          username = name;
         });
         Navigator.push(context,
             FadeRoute(page: MainPage())
@@ -516,8 +516,8 @@ class _IDPWState extends State<IDPW> {
       print("Response status: ${response.statusCode}");
       if (response.statusCode == 200) {
         Fluttertoast.showToast(msg: '비밀번호는 ${response.body.trim().split(':')[1].split('"')[1]} 입니다',toastLength: Toast.LENGTH_LONG);
-      } else if (response.statusCode == 400) {
-        Fluttertoast.showToast(msg: '이메일이 없습니다.');
+      } else if (response.statusCode == 404) {
+        Fluttertoast.showToast(msg: '등록되지 않은 계정입니다.');
       } else {
         Fluttertoast.showToast(msg: '관리자에게 문의하세요');
       }
@@ -565,7 +565,7 @@ class _MainPageState extends State<MainPage> {
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              top(context),
+              topT(context),
               search1(context),
               lowerHalf(context),
             ],
@@ -584,7 +584,7 @@ class _MainPageState extends State<MainPage> {
     super.initState();
   }
 
-  Widget top(BuildContext context) {
+  Widget topT(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(top:20.0),
       height: screenHeight / 5,
@@ -592,7 +592,7 @@ class _MainPageState extends State<MainPage> {
         future: fetchResultsTotalMoney(http.Client()),
         builder: (context,snap) {
           if (snap.hasError) print("error : "+snap.error.toString());
-          print("wwwwwwwwwwww"+fetchResultsTotalMoney(http.Client()).toString());
+          print("Snapap : "+snap.toString());
           return snap.hasData
               ? Top(MoneyResults: snap.data)
               : Center(child: CircularProgressIndicator());
@@ -674,6 +674,7 @@ class _MainPageState extends State<MainPage> {
         future: fetchResults(http.Client()),
         builder: (context, snapshot) {
           if (snapshot.hasError) print(snapshot.error);
+          print("Snapap : "+snapshot.toString());
           print("wwww"+snapshot.hasData.toString());
           return snapshot.hasData
               ? ResultsList(Results: snapshot.data)
@@ -1146,26 +1147,26 @@ Future<List<Result>> fetchResults(http.Client client) async {
   final response =
   await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/'+username.trim()+'/');
   // compute 함수를 사용하여 parsePhotos를 별도 isolate에서 수행합니다.
+  print('http://dsc-ereceipt.appspot.com/api/main/receipt_list/'+username.trim()+'/');
+  print(response.body);
   return compute(parseResults, response.body);
 }
-
 
 Future<List<MoneyResult>> fetchResultsTotalMoney(http.Client client) async {
   final response =
   await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/');
 
   print(response.body);
-  return compute(parseMoneyResult,response.body);
+  return compute(parseMoneyResult,"["+response.body+"]");
 }
 
 List<Result> parseResults(String responseBody) {
-  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
-
+  final parsed = json.decode(responseBody).cast<Map<dynamic, dynamic>>();
   return parsed.map<Result>((json) => Result.fromJson(json)).toList();
 }
 
 List<MoneyResult> parseMoneyResult(String responseBody) {
-  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+  final parsed = json.decode(responseBody).cast<Map<dynamic, dynamic>>();
 
   return parsed.map<MoneyResult>((json) => MoneyResult.fromJson(json)).toList();
 }
@@ -1181,7 +1182,7 @@ class Result {
 
   Result({this.id, this.user, this.receipt_img_url, this.receipt_date, this.total_price, this.device_id});
 
-  factory Result.fromJson(Map<String, dynamic> json) {
+  factory Result.fromJson(Map<dynamic, dynamic> json) {
     return Result(
       id: json['id'] as int,
       user: json['user'] as int,
@@ -1198,7 +1199,7 @@ class MoneyResult {
 
   MoneyResult({this.total_price__sum});
 
-  factory MoneyResult.fromJson(Map<String, dynamic> json) {
+  factory MoneyResult.fromJson(Map<dynamic, dynamic> json) {
     return MoneyResult(
       total_price__sum: json['total_price__sum'] as int,
     );
@@ -1211,39 +1212,43 @@ class Top extends StatelessWidget {
   static const Color transparent = Color(0x00000000);
 
   Top({Key key, this.MoneyResults}) : super(key: key);
-  double screenHeight;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: screenHeight / 5,
-      child: Container(
-                                      child: TextField(
-                                          textAlign: TextAlign.center,
-                                          controller: TextEditingController()..text = MoneyResults[0].total_price__sum.toString(),
-                                          autofocus: false,
-                                          enabled: false,
-                                          decoration: new InputDecoration(
-                                            border: InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            errorBorder: InputBorder.none,
-                                            disabledBorder: InputBorder.none,
-                                            contentPadding: EdgeInsets.only(
-                                                left: 15,
-                                                bottom: 11,
-                                                top: 11,
-                                                right: 15),
-                                          ),
-                                          style: TextStyle(
-                                              fontSize: 40,
-                                              height: 2
-                                          )
-                                      ),
-                                    ),
-                              );
+      child: ListView.builder(
+          itemCount: MoneyResults.length,
+          itemBuilder: (context, index) {
+            return Container(
+              child: TextField(
+                  textAlign: TextAlign.center,
+                  controller: TextEditingController()
+                    ..text = MoneyResults[index].total_price__sum.toString()+ " 원",
+                  autofocus: false,
+                  enabled: false,
+                  decoration: new InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.only(
+                        left: 15,
+                        bottom: 11,
+                        top: 11,
+                        right: 15),
+                  ),
+                  style: TextStyle(
+                      fontSize: 40,
+                      height: 2
+                  )
+              ),
+            );
+          }
+      ),
+    );
   }
-}
+  }
 
 
 //리스트 출력 부분 리스트 뷰로 스크롤 가능
@@ -1251,7 +1256,7 @@ class ResultsList extends StatelessWidget {
   final List<Result> Results;
   static const Color transparent = Color(0x00000000);
   ResultsList({Key key, this.Results}) : super(key: key);
-
+  int a = 0;
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -1265,17 +1270,17 @@ class ResultsList extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   Text(Results[index].receipt_date.substring(5,10)),
-                  SizedBox(width: 100,),
-                  Text(Results[index].device_id.toString())
+                  Text(Results[index].device_id.toString()),
+                  Text(Results[index].total_price.toString())
                 ],
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
               ),
             ),
-            trailing: Image.network(Results.length > index ? Results[index].receipt_img_url : ""),
             onLongPress: () => {
             SlideDialog.showSlideDialog(
               context: context,
               child: Expanded(
-                child:Image.network(Results.length > index ? Results[index].receipt_img_url : "",fit: BoxFit.fill,),
+                child:Image.network(Results[index].receipt_img_url,fit: BoxFit.fill,),
               ),
               barrierColor: Colors.white.withOpacity(0.7),
               pillColor: c1,
