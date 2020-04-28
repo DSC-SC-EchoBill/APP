@@ -47,20 +47,3 @@ class check_user_link{
   factory check_user_link.fromJson(Map<String, dynamic> json) => _$check_user_linkFromJson(json);
   Map<String, dynamic> toJson() => _$check_user_linkToJson(this);
 }
-
-@JsonSerializable()
-class SearchList{
-  SearchList(this.month);
-  int month;
-  factory SearchList.fromJson(Map<String, dynamic> json) => _$SearchListFromJson(json);
-  Map<String, dynamic> toJson() => _$SearchListToJson(this);
-}
-
-@JsonSerializable()
-class DesignateList{
-  DesignateList(this.datevar1, this.datevar2);
-  String datevar1;
-  String datevar2;
-  factory DesignateList.fromJson(Map<String, dynamic> json) => _$DesignateListFromJson(json);
-  Map<String, dynamic> toJson() => _$DesignateListToJson(this);
-}

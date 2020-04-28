@@ -27,7 +27,6 @@ import 'package:load/load.dart';
 import 'package:link/link.dart';
 import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 
 void main() => runApp(
     MyApp(),
@@ -1027,7 +1026,7 @@ class Month{
     return <Month>[
       Month(1,'1Month'),
       Month(3,'3Month'),
-      Month(6,'6Month'),
+      Month(5,'5Month'),
     ];
   }
 
@@ -1259,6 +1258,21 @@ Future<List<Result>> fetchResults(http.Client client, String date1, String date2
   } else {
     response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/');
   }
+  return compute(parseResults, response.body);
+}
+
+Future<List<Result>> fetchMonthlyResults(http.Client client) async {
+  http.Response response;
+  if (Month == 1) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${Month}');
+  } else if (Month == 3) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${Month}');
+  } else if (Month == 6) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${Month}');
+  } else {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}');
+  }
+
   return compute(parseResults, response.body);
 }
 

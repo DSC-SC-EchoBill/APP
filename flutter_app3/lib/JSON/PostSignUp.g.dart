@@ -71,27 +71,3 @@ Map<String, dynamic> _$check_user_linkToJson(check_user_link instance) =>
     <String, dynamic>{
       'username': instance.username,
     };
-
-SearchList _$SearchListFromJson(Map<String, dynamic> json) {
-  return SearchList(
-    json['month'] as int,
-  );
-}
-
-Map<String, dynamic> _$SearchListToJson(SearchList instance) =>
-    <String, dynamic>{
-      'month' : instance.month,
-    };
-
-DesignateList _$DesignateList(Map<String, dynamic> json) {
-  return DesignateList(
-    json['datevar1'] as String,
-    json['datevar2'] as String,
-  );
-}
-
-Map<String, dynamic> _$DesignateListFromJson(DesignateList instance) =>
-    <String, dynamic>{
-      'datevar1' : instance.date1,
-      'datevar2' : instance.date2,
-    };
