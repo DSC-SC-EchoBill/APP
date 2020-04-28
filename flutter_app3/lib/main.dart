@@ -547,10 +547,13 @@ class _MainPageState extends State<MainPage> {
 
   static const Color transparent = Color(0x00000000);
 
+  int count = 0;
+
   TextEditingController Date1 = new TextEditingController();
   TextEditingController Date2 = new TextEditingController();
   TextEditingController Money = new TextEditingController();
   TextEditingController Won = new TextEditingController();
+  TextEditingController Newest = new TextEditingController();
   String barcode= ""; //qr 바코드 주소
   final scaffoldkey = GlobalKey<ScaffoldState>();
   @override
@@ -639,18 +642,36 @@ class _MainPageState extends State<MainPage> {
               width: 70,
               child: GestureDetector(
                 onTap: () {
-                  print("touch");
+                  if(count ==0){
+                    count = 1;
+                    Newest.text = "Oldest";
+                  }else{
+                    count = 0;
+                    Newest.text = "Newest";
+                  }
                 },
                 child: Material(
                   color: transparent,
                   borderRadius: BorderRadius.circular(20.0),
                   child: Center(
-                    child: Text('Newest',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontFamily: 'Montserrat'
-                      ),
+                    child: TextField(
+                        textAlign: TextAlign.center,
+                        controller: Newest ..text = "Newest",
+                        autofocus: false,
+                        enabled: false,
+                        decoration: new InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                        ),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            fontFamily: 'Montserrat'
+                        )
                     ),
                   ),
                 ),)
@@ -671,18 +692,24 @@ class _MainPageState extends State<MainPage> {
       color: Colors.grey,
       height: 7*(screenHeight/10),
       child: FutureBuilder<List<Result>>(
-        future: fetchResults(http.Client()),
+        future: fetchResults(http.Client(), Date1.text, Date2.text),
         builder: (context, snapshot) {
           if (snapshot.hasError) print(snapshot.error);
-          print("Snapap : "+snapshot.toString());
-          print("wwww"+snapshot.hasData.toString());
-          return snapshot.hasData
-              ? ResultsList(Results: snapshot.data)
-              : Center(child: CircularProgressIndicator());
+          print(count);
+          if(count==0) {
+            return snapshot.hasData
+                ? ResultsList(Results: snapshot.data)
+                : Center(child: CircularProgressIndicator());
+          }else if(count==1){
+            return snapshot.hasData
+                ? ResultsList2(Results: snapshot.data)
+                : Center(child: CircularProgressIndicator());
+          }
         },
       ),
     );
   }
+
 
   Future<void> Select_date(BuildContext context) {
     return showDialog<void>(
@@ -1143,12 +1170,13 @@ class _RegisterState extends State<Register> {
 }
 
 //리스트 주소 기본임
-Future<List<Result>> fetchResults(http.Client client) async {
-  final response =
-  await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/'+username.trim()+'/');
-  // compute 함수를 사용하여 parsePhotos를 별도 isolate에서 수행합니다.
-  print('http://dsc-ereceipt.appspot.com/api/main/receipt_list/'+username.trim()+'/');
-  print(response.body);
+Future<List<Result>> fetchResults(http.Client client, String date1, String date2) async {
+  http.Response response;
+  if (date1!="" && date2!=""){
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${date1.trim()}/${date2.trim()}');
+  } else {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/');
+  }
   return compute(parseResults, response.body);
 }
 
@@ -1263,35 +1291,75 @@ class ResultsList extends StatelessWidget {
       itemCount: Results.length,
       itemBuilder: (context, index) {
         return Container(
-          color: transparent,
-          child: ListTile(
-            title: Container(
-              height: 60,
-              child: Row(
-                children: <Widget>[
-                  Text(Results[index].receipt_date.substring(5,10)),
-                  Text(Results[index].device_id.toString()),
-                  Text(Results[index].total_price.toString())
-                ],
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            color: transparent,
+            child: ListTile(
+              title: Container(
+                height: 60,
+                child: Row(
+                  children: <Widget>[
+                    Text(Results[index].receipt_date.substring(5,10)),
+                    Text(Results[index].device_id.toString()),
+                    Text(Results[index].total_price.toString())
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
               ),
-            ),
-            onLongPress: () => {
-            SlideDialog.showSlideDialog(
-              context: context,
-              child: Expanded(
-                child:Image.network(Results[index].receipt_img_url,fit: BoxFit.fill,),
-              ),
-              barrierColor: Colors.white.withOpacity(0.7),
-              pillColor: c1,
-              backgroundColor: Colors.white,
+              onLongPress: () => {
+                SlideDialog.showSlideDialog(
+                  context: context,
+                  child: Expanded(
+                    child:Image.network(Results[index].receipt_img_url,fit: BoxFit.fill,),
+                  ),
+                  barrierColor: Colors.white.withOpacity(0.7),
+                  pillColor: c1,
+                  backgroundColor: Colors.white,
+                )
+              },
             )
-            },
-          )
         );
       },
     );
   }
 }
-
+class ResultsList2 extends StatelessWidget {
+  final List<Result> Results;
+  static const Color transparent = Color(0x00000000);
+  ResultsList2({Key key, this.Results}) : super(key: key);
+  int a = 0;
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: Results.length,
+      itemBuilder: (context, index) {
+        return Container(
+            color: transparent,
+            child: ListTile(
+              title: Container(
+                height: 60,
+                child: Row(
+                  children: <Widget>[
+                    Text(Results[Results.length-index-1].receipt_date.substring(5,10)),
+                    Text(Results[Results.length-index-1].device_id.toString()),
+                    Text(Results[Results.length-index-1].total_price.toString())
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+              ),
+              onLongPress: () => {
+                SlideDialog.showSlideDialog(
+                  context: context,
+                  child: Expanded(
+                    child:Image.network(Results[Results.length-index-1].receipt_img_url,fit: BoxFit.fill,),
+                  ),
+                  barrierColor: Colors.white.withOpacity(0.7),
+                  pillColor: c1,
+                  backgroundColor: Colors.white,
+                )
+              },
+            )
+        );
+      },
+    );
+  }
+}
 
