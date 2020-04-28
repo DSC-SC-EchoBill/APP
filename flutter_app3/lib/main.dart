@@ -553,9 +553,17 @@ class _MainPageState extends State<MainPage> {
   TextEditingController Date2 = new TextEditingController();
   TextEditingController Money = new TextEditingController();
   TextEditingController Won = new TextEditingController();
-  TextEditingController Newest = new TextEditingController();
   String barcode= ""; //qr 바코드 주소
   final scaffoldkey = GlobalKey<ScaffoldState>();
+
+  List<Month> _month = Month.getMonth();
+  List<DropdownMenuItem<Month>> _monthMenuItems;
+  Month _selectMonth;
+
+  List<Newest> _newest = Newest.getNewest();
+  List<DropdownMenuItem<Newest>> _newestMenuItems;
+  Newest _selectNewest;
+
   @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
@@ -584,7 +592,37 @@ class _MainPageState extends State<MainPage> {
   @override
   initState(){
     print(username);
+    _monthMenuItems = buildDropdownMenuItem(_month);
+    _selectMonth = _monthMenuItems[0].value;
+    _newestMenuItems = buildDropdownMenuItemnew(_newest);
+    _selectNewest = _newestMenuItems[0].value;
     super.initState();
+  }
+
+  List<DropdownMenuItem<Newest>> buildDropdownMenuItemnew(List newest){
+    List<DropdownMenuItem<Newest>> items = List();
+    for(Newest nn in newest){
+      items.add(
+          DropdownMenuItem(
+            value: nn,
+            child: Text(nn.est),
+          )
+      );
+    }
+    return items;
+  }
+
+  List<DropdownMenuItem<Month>> buildDropdownMenuItem(List month){
+    List<DropdownMenuItem<Month>> items = List();
+    for(Month mm in month){
+      items.add(
+          DropdownMenuItem(
+            value: mm,
+            child: Text(mm.dal),
+          )
+      );
+    }
+    return items;
   }
 
   Widget topT(BuildContext context) {
@@ -642,36 +680,17 @@ class _MainPageState extends State<MainPage> {
               width: 70,
               child: GestureDetector(
                 onTap: () {
-                  if(count ==0){
-                    count = 1;
-                    Newest.text = "Oldest";
-                  }else{
-                    count = 0;
-                    Newest.text = "Newest";
-                  }
                 },
                 child: Material(
                   color: transparent,
                   borderRadius: BorderRadius.circular(20.0),
                   child: Center(
-                    child: TextField(
-                        textAlign: TextAlign.center,
-                        controller: Newest ..text = "Newest",
-                        autofocus: false,
-                        enabled: false,
-                        decoration: new InputDecoration(
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          errorBorder: InputBorder.none,
-                          disabledBorder: InputBorder.none,
-                        ),
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontFamily: 'Montserrat'
-                        )
+                    child: Text('Newest',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontFamily: 'Montserrat'
+                      ),
                     ),
                   ),
                 ),)
@@ -689,22 +708,16 @@ class _MainPageState extends State<MainPage> {
   }
   Widget lowerHalf(BuildContext context) {
     return Container(
-      color: Colors.grey,
+      color: Color.fromRGBO(231, 231, 231, 100),
       height: 7*(screenHeight/10),
       child: FutureBuilder<List<Result>>(
         future: fetchResults(http.Client(), Date1.text, Date2.text),
         builder: (context, snapshot) {
           if (snapshot.hasError) print(snapshot.error);
           print(count);
-          if(count==0) {
-            return snapshot.hasData
-                ? ResultsList(Results: snapshot.data)
-                : Center(child: CircularProgressIndicator());
-          }else if(count==1){
-            return snapshot.hasData
-                ? ResultsList2(Results: snapshot.data)
-                : Center(child: CircularProgressIndicator());
-          }
+          return snapshot.hasData
+              ? ResultsList(Results: snapshot.data)
+              : Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -716,11 +729,36 @@ class _MainPageState extends State<MainPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Choose Date',textAlign: TextAlign.center,),
+          title: Text('Choose Date',textAlign: TextAlign.center, style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontFamily: 'Montserrat'
+          ),),
           content: Container(
-            height: 90,
+            height: 130,
             child: Column(
               children: <Widget>[
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        child: DropdownButton(
+                          value: _selectMonth,
+                          items: _monthMenuItems,
+                          onChanged: onChangeDropdownItem,
+                        ),
+                      ),
+                      Container(
+                        child: DropdownButton(
+                          value: _selectNewest,
+                          items: _newestMenuItems,
+                          onChanged: onChangeDropdownItemnew,
+                        ),
+                      ),
+                    ],
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  )
+                ),
                 Container(
                   child:Row(
                    children: <Widget>[
@@ -817,6 +855,19 @@ class _MainPageState extends State<MainPage> {
         );
       },
     );
+  }
+
+  onChangeDropdownItem(Month selectMonth){
+    setState(() {
+      _selectMonth = selectMonth;
+      print(_selectMonth.month);
+    });
+  }
+  onChangeDropdownItemnew(Newest selectN){
+    setState(() {
+      _selectNewest = selectN;
+      print(_selectNewest);
+    });
   }
 
   //qr인식
@@ -962,6 +1013,37 @@ class _MainPageState extends State<MainPage> {
       }
       print("Response body: ${response.contentLength}");
     });
+  }
+
+}
+//달 선택
+class Month{
+  int month;
+  String dal;
+
+  Month(this.month,this.dal);
+
+  static List<Month> getMonth(){
+    return <Month>[
+      Month(1,'1Month'),
+      Month(3,'3Month'),
+      Month(6,'6Month'),
+    ];
+  }
+
+}
+
+class Newest{
+  int New;
+  String est;
+
+  Newest(this.New,this.est);
+
+  static List<Newest> getNewest(){
+    return <Newest>[
+      Newest(0,'Newest'),
+      Newest(1,'Oldest'),
+    ];
   }
 
 }
@@ -1251,7 +1333,7 @@ class Top extends StatelessWidget {
               child: TextField(
                   textAlign: TextAlign.center,
                   controller: TextEditingController()
-                    ..text = MoneyResults[index].total_price__sum.toString()+ " 원",
+                    ..text = MoneyResults[index].total_price__sum.toString()+ " ￦",
                   autofocus: false,
                   enabled: false,
                   decoration: new InputDecoration(
