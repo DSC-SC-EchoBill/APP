@@ -29,7 +29,7 @@ import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(
-    MyApp(),
+  MyApp(),
 );
 
 String username= "";
@@ -70,173 +70,173 @@ class _LoginpageState extends State<Loginpage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onBackPressed,
-      child: Scaffold(
-      resizeToAvoidBottomPadding: false,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            child:Column(
-              children: <Widget>[
-                Container(
-                    padding: EdgeInsets.only(left: 70,right: 70,top:50),
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(height: 100.0),
-                        Image.asset('lib/assets/login_logo2.png',),
-                        SizedBox(height: 40.0),
-                      ],
-                    )
-      ),
-                Container(
-                    padding: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
-                    child: Column(
-                      children: <Widget>[
-                        TextField(
-                          controller: Id,
-                          decoration: InputDecoration(
-                              labelText: 'ID',
-                              labelStyle: TextStyle(
-                                  fontFamily: 'Montserrat',
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey
-                              ),
-                              focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: c1)
-                              ),
-                          ),
-                        ),
-
-                        SizedBox(height: 10.0),
-                        TextField(
-                          controller: Password,
-                          decoration: InputDecoration(
-                            labelText: 'PW',
-                            labelStyle: TextStyle(
-                                fontFamily: 'Montserrat',
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: c1)
-                            ),
-                          ),
-                          obscureText: true,
-                        ),
-
-                        SizedBox(height: 5.0),
-                        Container(
-                          child: Row(
+        onWillPop: _onBackPressed,
+        child: Scaffold(
+          resizeToAvoidBottomPadding: false,
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                  child:Column(
+                    children: <Widget>[
+                      Container(
+                          padding: EdgeInsets.only(left: 70,right: 70,top:50),
+                          child: Column(
                             children: <Widget>[
-                              Container(
-                                child: Checkbox(
-                                  value:isLoggedIn,
-                                  onChanged: (bool value){
-                                    check_box(value);
-                                    setState(() {
-                                      isLoggedIn = value;
-                                      print(isLoggedIn);
-                                    });
-                                  },
-                                ),
-                              ),
-                              Container(
-                                child:Text('auto login')
-                              )
+                              SizedBox(height: 100.0),
+                              Image.asset('lib/assets/login_logo2.png',),
+                              SizedBox(height: 40.0),
                             ],
-                          ),
-                        ),
-                        SizedBox(height: 5.0,),
-                        Container(
-                          alignment: Alignment(1.0, 0.0),
-                          padding: EdgeInsets.only(top: 15.0, left: 20.0),
-                          child: InkWell(
-                              onTap: () {
-                                Navigator.push(context,
-                                    FadeRoute(page: IDPW())
-                                );
-                              },
-                              child: Text('Forget Password ?',
-                                style: TextStyle(
-                                    color: c1,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Montserrat',
-                                    decoration: TextDecoration.underline
-                                ),
-                              )
-                          ),
-                        ),
-
-                        SizedBox(height: 30.0),
-                        Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20.0),
-                                gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end:Alignment.bottomRight,
-                                    colors:[c1,c2]
-                                )
-                            ),
-                            height: 50.0,
-                            child: GestureDetector(
-                              onTap: () {
-                                loginUser();
-                                postRequest();
-                              },
-                              child: Material(
-                                color: transparent,
-                                borderRadius: BorderRadius.circular(20.0),
-                                child: Center(
-                                  child: Text('Sign In',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'Montserrat'
-                                    ),
+                          )
+                      ),
+                      Container(
+                          padding: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
+                          child: Column(
+                            children: <Widget>[
+                              TextField(
+                                controller: Id,
+                                decoration: InputDecoration(
+                                  labelText: 'ID',
+                                  labelStyle: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: c1)
                                   ),
                                 ),
-                              ),)
-                        ),
-                      ],
-                    )
-                ),
+                              ),
 
-                SizedBox(height: 50.0),
-                Container(
-                  child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'New to E-Receipt ?',
-                      style: TextStyle(
-                          fontFamily: 'Montserrat'
+                              SizedBox(height: 10.0),
+                              TextField(
+                                controller: Password,
+                                decoration: InputDecoration(
+                                  labelText: 'PW',
+                                  labelStyle: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: c1)
+                                  ),
+                                ),
+                                obscureText: true,
+                              ),
+
+                              SizedBox(height: 5.0),
+                              Container(
+                                child: Row(
+                                  children: <Widget>[
+                                    Container(
+                                      child: Checkbox(
+                                        value:isLoggedIn,
+                                        onChanged: (bool value){
+                                          check_box(value);
+                                          setState(() {
+                                            isLoggedIn = value;
+                                            print(isLoggedIn);
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                    Container(
+                                        child:Text('auto login')
+                                    )
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 5.0,),
+                              Container(
+                                alignment: Alignment(1.0, 0.0),
+                                padding: EdgeInsets.only(top: 15.0, left: 20.0),
+                                child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(context,
+                                          FadeRoute(page: IDPW())
+                                      );
+                                    },
+                                    child: Text('Forget Password ?',
+                                      style: TextStyle(
+                                          color: c1,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Montserrat',
+                                          decoration: TextDecoration.underline
+                                      ),
+                                    )
+                                ),
+                              ),
+
+                              SizedBox(height: 30.0),
+                              Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20.0),
+                                      gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end:Alignment.bottomRight,
+                                          colors:[c1,c2]
+                                      )
+                                  ),
+                                  height: 50.0,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      loginUser();
+                                      postRequest();
+                                    },
+                                    child: Material(
+                                      color: transparent,
+                                      borderRadius: BorderRadius.circular(20.0),
+                                      child: Center(
+                                        child: Text('Sign In',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: 'Montserrat'
+                                          ),
+                                        ),
+                                      ),
+                                    ),)
+                              ),
+                            ],
+                          )
                       ),
-                    ),
-                    SizedBox(width: 5.0),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(context,
-                            FadeRoute(page: Register())
-                        );
-                      },
-                      child: Text('Register',
-                        style: TextStyle(
-                            color: c1,
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline
+
+                      SizedBox(height: 50.0),
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'New to E-Receipt ?',
+                              style: TextStyle(
+                                  fontFamily: 'Montserrat'
+                              ),
+                            ),
+                            SizedBox(width: 5.0),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(context,
+                                    FadeRoute(page: Register())
+                                );
+                              },
+                              child: Text('Register',
+                                style: TextStyle(
+                                    color: c1,
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline
+                                ),
+                              ),
+                            )
+                          ],
                         ),
-                      ),
-                    )
-                  ],
-                ),
-                )
-        ],
-      )
+                      )
+                    ],
+                  )
+              ),
+            ],
           ),
-        ],
-      ),
-    )
+        )
     );
   }
 
@@ -401,22 +401,22 @@ class _IDPWState extends State<IDPW> {
                           )
                       ),
                       height: 40.0,
-                    child: GestureDetector(
-                        onTap: () {
-                          postRequest();
-                        },
-                      child: Material(
-                        color: transparent,
-                          child: Center(
-                            child: Text(
-                              'Authenticate',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Montserrat'),
+                      child: GestureDetector(
+                          onTap: () {
+                            postRequest();
+                          },
+                          child: Material(
+                            color: transparent,
+                            child: Center(
+                              child: Text(
+                                'Authenticate',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Montserrat'),
+                              ),
                             ),
-                          ),
+                          )
                       )
-                    )
                   ),
                   SizedBox(height: 20.0),
                   Container(
@@ -567,24 +567,24 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-        appBar: AppBar(
-          title: Image.asset('lib/assets/login_logo2.png',width: 100,),
-          backgroundColor: Colors.white,
-          automaticallyImplyLeading: false,
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              topT(context),
-              search1(context),
-              lowerHalf(context),
-            ],
-          ),physics: NeverScrollableScrollPhysics(),
-        ),
-          floatingActionButton: new FloatingActionButton(
-              backgroundColor: Colors.indigo,
-              onPressed: scan,
-              child: Icon(Icons.camera)),
+      appBar: AppBar(
+        title: Image.asset('lib/assets/login_logo2.png',width: 100,),
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            topT(context),
+            search1(context),
+            lowerHalf(context),
+          ],
+        ),physics: NeverScrollableScrollPhysics(),
+      ),
+      floatingActionButton: new FloatingActionButton(
+          backgroundColor: Colors.indigo,
+          onPressed: scan,
+          child: Icon(Icons.camera)),
     );
   }
 
@@ -652,7 +652,7 @@ class _MainPageState extends State<MainPage> {
       ),
       height: screenHeight/14,
       child: Row(
-              children:<Widget>[
+        children:<Widget>[
           Container(
               width: 50,
               decoration: BoxDecoration(
@@ -694,12 +694,12 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ),)
           ),
-                IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    Select_date(context);
-                  }
-                )
+          IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                Select_date(context);
+              }
+          )
         ],
         mainAxisAlignment: MainAxisAlignment.end,
       ),
@@ -734,114 +734,114 @@ class _MainPageState extends State<MainPage> {
               fontFamily: 'Montserrat'
           ),),
           content: Container(
-            height: 130,
-            child: Column(
-              children: <Widget>[
-                Container(
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        child: DropdownButton(
-                          value: _selectMonth,
-                          items: _monthMenuItems,
-                          onChanged: onChangeDropdownItem,
-                        ),
-                      ),
-                      Container(
-                        child: DropdownButton(
-                          value: _selectNewest,
-                          items: _newestMenuItems,
-                          onChanged: onChangeDropdownItemnew,
-                        ),
-                      ),
-                    ],
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              height: 130,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            child: DropdownButton<Month>(
+                              value: _selectMonth,
+                              items: _monthMenuItems,
+                              onChanged: onChangeDropdownItem,
+                            ),
+                          ),
+                          Container(
+                            child: DropdownButton(
+                              value: _selectNewest,
+                              items: _newestMenuItems,
+                              onChanged: onChangeDropdownItemnew,
+                            ),
+                          ),
+                        ],
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      )
+                  ),
+                  Container(
+                      child:Row(
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.calendar_today),
+                            onPressed: (){
+                              showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2001),
+                                  lastDate: DateTime(2021)
+                              ).then((date){
+                                setState(() {
+                                  _dateTime1 = date;
+                                  Date1.text = format.format(_dateTime1).toString();
+                                });
+                              });
+                            },
+                          ),
+                          Container(
+                            width:70,
+                            child:TextField(
+                              style:TextStyle(
+                                fontSize: 10,
+                              ),
+                              controller: Date1,
+                              autofocus: false,
+                              enabled: false,
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: c1)
+                                ),
+                              ),
+                            ),
+                          ),
+                          Text("~"),
+                          IconButton(
+                            icon: Icon(Icons.calendar_today),
+                            onPressed: (){
+                              showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2001),
+                                  lastDate: DateTime(2021)
+                              ).then((date){
+                                setState(() {
+                                  _dateTime2 = date;
+                                  Date2.text =  format.format(_dateTime2).toString();
+                                });
+                              });
+                            },
+                          ),
+                          Container(
+                            width:70,
+                            child:TextField(
+                              style:TextStyle(
+                                fontSize: 10,
+                              ),
+                              controller: Date2,
+                              autofocus: false,
+                              enabled: false,
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: c1)
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
                   )
-                ),
-                Container(
-                  child:Row(
-                   children: <Widget>[
-                     IconButton(
-                       icon: Icon(Icons.calendar_today),
-                       onPressed: (){
-                         showDatePicker(
-                             context: context,
-                             initialDate: DateTime.now(),
-                             firstDate: DateTime(2001),
-                             lastDate: DateTime(2021)
-                         ).then((date){
-                           setState(() {
-                             _dateTime1 = date;
-                             Date1.text = format.format(_dateTime1).toString();
-                           });
-                         });
-                       },
-                     ),
-                     Container(
-                       width:70,
-                       child:TextField(
-                         style:TextStyle(
-                             fontSize: 10,
-                         ),
-                         controller: Date1,
-                         autofocus: false,
-                         enabled: false,
-                         decoration: InputDecoration(
-                           labelStyle: TextStyle(
-                               fontFamily: 'Montserrat',
-                               fontWeight: FontWeight.bold,
-                               color: Colors.grey
-                           ),
-                           focusedBorder: UnderlineInputBorder(
-                               borderSide: BorderSide(color: c1)
-                           ),
-                         ),
-                       ),
-                     ),
-                     Text("~"),
-                     IconButton(
-                       icon: Icon(Icons.calendar_today),
-                       onPressed: (){
-                         showDatePicker(
-                             context: context,
-                             initialDate: DateTime.now(),
-                             firstDate: DateTime(2001),
-                             lastDate: DateTime(2021)
-                         ).then((date){
-                           setState(() {
-                             _dateTime2 = date;
-                             Date2.text =  format.format(_dateTime2).toString();
-                           });
-                         });
-                       },
-                     ),
-                     Container(
-                       width:70,
-                       child:TextField(
-                         style:TextStyle(
-                           fontSize: 10,
-                         ),
-                         controller: Date2,
-                         autofocus: false,
-                         enabled: false,
-                         decoration: InputDecoration(
-                           labelStyle: TextStyle(
-                               fontFamily: 'Montserrat',
-                               fontWeight: FontWeight.bold,
-                               color: Colors.grey
-                           ),
-                           focusedBorder: UnderlineInputBorder(
-                               borderSide: BorderSide(color: c1)
-                           ),
-                         ),
-                       ),
-                     ),
-                   ],
-                  )
-                )
-              ],
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            )
+                ],
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              )
           ),
           actions: <Widget>[
             FlatButton(
@@ -859,7 +859,7 @@ class _MainPageState extends State<MainPage> {
   onChangeDropdownItem(Month selectMonth){
     setState(() {
       _selectMonth = selectMonth;
-      print(_selectMonth.month);
+      print("select Month: ${_selectMonth.month}");
     });
   }
   onChangeDropdownItemnew(Newest selectN){
@@ -897,19 +897,19 @@ class _MainPageState extends State<MainPage> {
     print('Url : ${url}');
     showDialog(
         context: context,
-      builder: (BuildContext){
+        builder: (BuildContext){
           return WillPopScope(
             child:Scaffold(
               body: Column(
                 children: <Widget>[
                   Container(
-                    child: Column(
+                      child: Column(
                         children: <Widget>[
-                        Container(
-                        child: Image.network(url), //이미지
-                  ),
-            ],
-                    )
+                          Container(
+                            child: Image.network(url), //이미지
+                          ),
+                        ],
+                      )
                   ),
                   Container(
                     child: Row(
@@ -922,13 +922,38 @@ class _MainPageState extends State<MainPage> {
                             onTap: (){
                               _saveNetworkImage(url);
                             },
-                          child: Material(
+                            child: Material(
                               borderRadius: BorderRadius.circular(20.0),
                               shadowColor: Colors.greenAccent,
                               color: c1,
                               elevation: 7.0,
+                              child: Center(
+                                child: Text('저장하기',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Montserrat'
+                                  ),
+                                ),
+                              ),
+
+                            ),
+                          ),
+                        ),
+                        Container(
+                            height: 50,
+                            width: 150,
+                            child:GestureDetector(
+                              onTap: () {
+                                print("push");
+                                Navigator.pop(context);},
+                              child: Material(
+                                borderRadius: BorderRadius.circular(20.0),
+                                shadowColor: Colors.greenAccent,
+                                color: c1,
+                                elevation: 7.0,
                                 child: Center(
-                                  child: Text('저장하기',
+                                  child: Text('나가기',
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -936,36 +961,11 @@ class _MainPageState extends State<MainPage> {
                                     ),
                                   ),
                                 ),
-
-                          ),
-                          ),
-                        ),
-                        Container(
-                          height: 50,
-                          width: 150,
-                          child:GestureDetector(
-                            onTap: () {
-                              print("push");
-                              Navigator.pop(context);},
-                            child: Material(
-                                borderRadius: BorderRadius.circular(20.0),
-                                shadowColor: Colors.greenAccent,
-                                color: c1,
-                                elevation: 7.0,
-                                  child: Center(
-                                    child: Text('나가기',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Montserrat'
-                                      ),
-                                    ),
-                                  ),
-                            ),
-                          )
+                              ),
+                            )
                         )
                       ],
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     ),
                   )
                 ],
@@ -973,7 +973,7 @@ class _MainPageState extends State<MainPage> {
             ),
 
           );
-      }
+        }
     );
   }
 
@@ -1024,9 +1024,10 @@ class Month{
 
   static List<Month> getMonth(){
     return <Month>[
+      Month(null, 'Clear'),
       Month(1,'1Month'),
       Month(3,'3Month'),
-      Month(5,'5Month'),
+      Month(6,'5Month'),
     ];
   }
 
@@ -1040,6 +1041,7 @@ class Newest{
 
   static List<Newest> getNewest(){
     return <Newest>[
+      Newest(null, 'Clear'),
       Newest(0,'Newest'),
       Newest(1,'Oldest'),
     ];
@@ -1066,152 +1068,152 @@ class _RegisterState extends State<Register> {
 
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _backPressed,
-      child: Scaffold(
-        resizeToAvoidBottomPadding: false,
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-          Container(
-            child: Stack(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.fromLTRB(15.0, 110.0, 0.0, 0.0),
-                  child: Text(
-                    'Register',
-                    style:
-                    TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-              padding: EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller:Id,
-                    decoration: InputDecoration(
-                        labelText: 'ID',
-                        labelStyle: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                        // hintText: 'EMAIL',
-                        // hintStyle: ,
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green))),
-                  ),
-                  SizedBox(height: 10.0),
-                  TextField(
-                    controller:Password,
-                    decoration: InputDecoration(
-                        labelText: 'PASSWORD ',
-                        labelStyle: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green))),
-                    obscureText: true,
-                  ),
-                  SizedBox(height: 10.0),
-                  TextField(
-                    controller:First_Name,
-                    decoration: InputDecoration(
-                        labelText: 'First_NAME',
-                        labelStyle: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green))),
-                  ),
-                  SizedBox(height: 10.0),
-                  TextField(
-                    controller:Last_Name,
-                    decoration: InputDecoration(
-                        labelText: 'Last_NAME',
-                        labelStyle: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green))),
-                  ),
-                  SizedBox(height: 10.0),
-                  TextField(
-                    controller:Email,
-                    decoration: InputDecoration(
-                        labelText: 'EMAIL',
-                        labelStyle: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green))),
-                  ),
-                  SizedBox(height: 30.0),
+        onWillPop: _backPressed,
+        child: Scaffold(
+            resizeToAvoidBottomPadding: false,
+            body: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
                   Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
-                          gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end:Alignment.bottomRight,
-                              colors:[c1,c2]
-                          )
-                      ),
-                      height: 40.0,
-                      child:GestureDetector(
-                        onTap: (){
-                          postRequest();
-                        },
-                      child: Material(
-                        color: transparent,
-                          child: Center(
-                            child: Text(
-                              'Register',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Montserrat'),
+                    child: Stack(
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.fromLTRB(15.0, 110.0, 0.0, 0.0),
+                          child: Text(
+                            'Register',
+                            style:
+                            TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                      padding: EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
+                      child: Column(
+                        children: <Widget>[
+                          TextField(
+                            controller:Id,
+                            decoration: InputDecoration(
+                                labelText: 'ID',
+                                labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey),
+                                // hintText: 'EMAIL',
+                                // hintStyle: ,
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.green))),
+                          ),
+                          SizedBox(height: 10.0),
+                          TextField(
+                            controller:Password,
+                            decoration: InputDecoration(
+                                labelText: 'PASSWORD ',
+                                labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.green))),
+                            obscureText: true,
+                          ),
+                          SizedBox(height: 10.0),
+                          TextField(
+                            controller:First_Name,
+                            decoration: InputDecoration(
+                                labelText: 'First_NAME',
+                                labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.green))),
+                          ),
+                          SizedBox(height: 10.0),
+                          TextField(
+                            controller:Last_Name,
+                            decoration: InputDecoration(
+                                labelText: 'Last_NAME',
+                                labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.green))),
+                          ),
+                          SizedBox(height: 10.0),
+                          TextField(
+                            controller:Email,
+                            decoration: InputDecoration(
+                                labelText: 'EMAIL',
+                                labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.green))),
+                          ),
+                          SizedBox(height: 30.0),
+                          Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end:Alignment.bottomRight,
+                                      colors:[c1,c2]
+                                  )
+                              ),
+                              height: 40.0,
+                              child:GestureDetector(
+                                  onTap: (){
+                                    postRequest();
+                                  },
+                                  child: Material(
+                                    color: transparent,
+                                    child: Center(
+                                      child: Text(
+                                        'Register',
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontFamily: 'Montserrat'),
+                                      ),
+                                    ),
+
+                                  ))
+                          ),
+                          SizedBox(height: 20.0),
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20.0),
+                                gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end:Alignment.bottomRight,
+                                    colors:[c1,c2]
+                                )
+                            ),
+                            height: 40.0,
+                            child: Container(
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child:
+                                Center(
+                                  child: Text('Go Back',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Montserrat')),
+                                ),
+                              ),
                             ),
                           ),
-
-                      ))
-                  ),
-                  SizedBox(height: 20.0),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.0),
-                        gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end:Alignment.bottomRight,
-                            colors:[c1,c2]
-                        )
-                    ),
-                    height: 40.0,
-                    child: Container(
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-                        child:
-                        Center(
-                          child: Text('Go Back',
-                              style: TextStyle(
-                                color: Colors.black,
-                                  fontFamily: 'Montserrat')),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              )),
-        ]
+                        ],
+                      )),
+                ]
+                )
+            )
         )
-      )
-      )
     );
   }
   Future<bool> _backPressed(){
@@ -1254,9 +1256,10 @@ class _RegisterState extends State<Register> {
 Future<List<Result>> fetchResults(http.Client client, String date1, String date2) async {
   http.Response response;
   if (date1!="" && date2!=""){
-    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${date1.trim()}/${date2.trim()}');
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username.trim()}/${date1.trim()}/${date2.trim()}');
+    print(response.body);
   } else {
-    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/');
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username.trim()}/');
   }
   return compute(parseResults, response.body);
 }
@@ -1372,7 +1375,7 @@ class Top extends StatelessWidget {
       ),
     );
   }
-  }
+}
 
 
 //리스트 출력 부분 리스트 뷰로 스크롤 가능
