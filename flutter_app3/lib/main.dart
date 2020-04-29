@@ -593,8 +593,11 @@ class _MainPageState extends State<MainPage> {
     print(username);
     _monthMenuItems = buildDropdownMenuItem(_month);
     _selectMonth = _monthMenuItems[0].value;
+    _selectMonth.month = 0;
     _newestMenuItems = buildDropdownMenuItemnew(_newest);
     _selectNewest = _newestMenuItems[0].value;
+    _selectNewest.New = 0;
+    print("Printtt:${_selectNewest.New}");
     super.initState();
   }
 
@@ -697,6 +700,7 @@ class _MainPageState extends State<MainPage> {
           IconButton(
               icon: Icon(Icons.search),
               onPressed: () {
+                _selectMonth.month = 0;
                 Select_date(context);
               }
           )
@@ -710,13 +714,19 @@ class _MainPageState extends State<MainPage> {
       color: Color.fromRGBO(231, 231, 231, 100),
       height: 7*(screenHeight/10),
       child: FutureBuilder<List<Result>>(
-        future: fetchResults(http.Client(), Date1.text, Date2.text),
+        future: _selectMonth.month == 0 ?fetchResults(http.Client(), Date1.text, Date2.text) : fetchMonthlyResults(http.Client(), _selectMonth.month),
         builder: (context, snapshot) {
           if (snapshot.hasError) print(snapshot.error);
           print(count);
-          return snapshot.hasData
-              ? ResultsList(Results: snapshot.data)
-              : Center(child: CircularProgressIndicator());
+          if(_selectNewest.New == 0) {
+            return snapshot.hasData
+                ? ResultsList(Results: snapshot.data)
+                : Center(child: CircularProgressIndicator());
+          }else if(_selectNewest.New == 1){
+            return snapshot.hasData
+                ? ResultsList2(Results: snapshot.data)
+                : Center(child: CircularProgressIndicator());
+          }
         },
       ),
     );
@@ -865,7 +875,7 @@ class _MainPageState extends State<MainPage> {
   onChangeDropdownItemnew(Newest selectN){
     setState(() {
       _selectNewest = selectN;
-      print(_selectNewest);
+      print("print : ${_selectNewest.New}");
     });
   }
 
@@ -1264,18 +1274,16 @@ Future<List<Result>> fetchResults(http.Client client, String date1, String date2
   return compute(parseResults, response.body);
 }
 
-Future<List<Result>> fetchMonthlyResults(http.Client client) async {
+Future<List<Result>> fetchMonthlyResults(http.Client client, int month) async {
   http.Response response;
-  if (Month == 1) {
-    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${Month}');
-  } else if (Month == 3) {
-    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${Month}');
-  } else if (Month == 6) {
-    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${Month}');
-  } else {
-    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}');
+  if (month == 1) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${month}');
+  } else if (month == 3) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${month}');
+  } else if (month == 6) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${month}');
   }
-
+  print('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${Month}');
   return compute(parseResults, response.body);
 }
 
