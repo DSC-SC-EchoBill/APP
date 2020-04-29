@@ -33,6 +33,7 @@ void main() => runApp(
 );
 
 String username= "";
+String TMoney = "";
 
 Color c1 = const Color.fromRGBO(164, 205, 57, 100);
 Color c2 = const Color.fromRGBO(208, 222, 63, 100);
@@ -64,6 +65,7 @@ class _LoginpageState extends State<Loginpage> {
   TextEditingController Password = new TextEditingController();
   TextEditingController Id = new TextEditingController();
   static const Color transparent = Color(0x00000000);
+  double screenHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -78,17 +80,17 @@ class _LoginpageState extends State<Loginpage> {
                   child:Column(
                     children: <Widget>[
                       Container(
-                          padding: EdgeInsets.only(left: 70,right: 70,top:90),
+                          padding: EdgeInsets.only(left: 70,right: 70,top:50),
                           child: Column(
                             children: <Widget>[
                               SizedBox(height: 100.0),
                               Image.asset('lib/assets/login_logo2.png',),
-                              SizedBox(height: 50.0),
+                              SizedBox(height: 40.0),
                             ],
                           )
                       ),
                       Container(
-                          padding: EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
+                          padding: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
                           child: Column(
                             children: <Widget>[
                               TextField(
@@ -251,7 +253,7 @@ class _LoginpageState extends State<Loginpage> {
       if (response.statusCode == 200) {
         Fluttertoast.showToast(msg: '로그인 성공!');
         setState(() {
-          username = Id.text;
+          username = name;
         });
         Navigator.push(context,
             FadeRoute(page: MainPage())
@@ -513,8 +515,8 @@ class _IDPWState extends State<IDPW> {
       print("Response status: ${response.statusCode}");
       if (response.statusCode == 200) {
         Fluttertoast.showToast(msg: '비밀번호는 ${response.body.trim().split(':')[1].split('"')[1]} 입니다',toastLength: Toast.LENGTH_LONG);
-      } else if (response.statusCode == 400) {
-        Fluttertoast.showToast(msg: '이메일이 없습니다.');
+      } else if (response.statusCode == 404) {
+        Fluttertoast.showToast(msg: '등록되지 않은 계정입니다.');
       } else {
         Fluttertoast.showToast(msg: '관리자에게 문의하세요');
       }
@@ -530,9 +532,6 @@ class _IDPWState extends State<IDPW> {
 
 
 class MainPage extends StatefulWidget {
-  final List<Result> Results;
-  static const Color transparent = Color(0x00000000);
-  MainPage({Key key, this.Results}) : super(key: key);
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -547,12 +546,23 @@ class _MainPageState extends State<MainPage> {
 
   static const Color transparent = Color(0x00000000);
 
+  int count = 0;
+
   TextEditingController Date1 = new TextEditingController();
   TextEditingController Date2 = new TextEditingController();
   TextEditingController Money = new TextEditingController();
   TextEditingController Won = new TextEditingController();
   String barcode= ""; //qr 바코드 주소
   final scaffoldkey = GlobalKey<ScaffoldState>();
+
+  List<Month> _month = Month.getMonth();
+  List<DropdownMenuItem<Month>> _monthMenuItems;
+  Month _selectMonth;
+
+  List<Newest> _newest = Newest.getNewest();
+  List<DropdownMenuItem<Newest>> _newestMenuItems;
+  Newest _selectNewest;
+
   @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
@@ -565,7 +575,7 @@ class _MainPageState extends State<MainPage> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            top(context),
+            topT(context),
             search1(context),
             lowerHalf(context),
           ],
@@ -581,38 +591,55 @@ class _MainPageState extends State<MainPage> {
   @override
   initState(){
     print(username);
+    _monthMenuItems = buildDropdownMenuItem(_month);
+    _selectMonth = _monthMenuItems[0].value;
+    _selectMonth.month = 0;
+    _newestMenuItems = buildDropdownMenuItemnew(_newest);
+    _selectNewest = _newestMenuItems[0].value;
+    _selectNewest.New = 0;
+    print("Printtt:${_selectNewest.New}");
     super.initState();
-    Money.text = '0';
   }
 
-  Widget top(BuildContext context) {
+  List<DropdownMenuItem<Newest>> buildDropdownMenuItemnew(List newest){
+    List<DropdownMenuItem<Newest>> items = List();
+    for(Newest nn in newest){
+      items.add(
+          DropdownMenuItem(
+            value: nn,
+            child: Text(nn.est),
+          )
+      );
+    }
+    return items;
+  }
+
+  List<DropdownMenuItem<Month>> buildDropdownMenuItem(List month){
+    List<DropdownMenuItem<Month>> items = List();
+    for(Month mm in month){
+      items.add(
+          DropdownMenuItem(
+            value: mm,
+            child: Text(mm.dal),
+          )
+      );
+    }
+    return items;
+  }
+
+  Widget topT(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(top:20.0),
       height: screenHeight / 5,
-      child: Column(
-          children:<Widget>[
-            Container(
-              child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: Money,
-                  autofocus: false,
-                  enabled: false,
-                  decoration: new InputDecoration(
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
-                  ),
-                  style:TextStyle(
-                      fontSize: 40,
-                      height: 2
-                  )
-              ),
-            ),
-          ],
-          mainAxisAlignment: MainAxisAlignment.center
+      child: FutureBuilder<List<MoneyResult>>(
+        future: fetchResultsTotalMoney(http.Client()),
+        builder: (context,snap) {
+          if (snap.hasError) print("error : "+snap.error.toString());
+          print("Snapap : "+snap.toString());
+          return snap.hasData
+              ? Top(MoneyResults: snap.data)
+              : Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }
@@ -641,7 +668,7 @@ class _MainPageState extends State<MainPage> {
                   color: transparent,
                   borderRadius: BorderRadius.circular(20.0),
                   child: Center(
-                    child: Text('Month', // 월별 데이터를 요청하는 부분
+                    child: Text('Month',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -655,7 +682,6 @@ class _MainPageState extends State<MainPage> {
               width: 70,
               child: GestureDetector(
                 onTap: () {
-                  print("touch"); // 최신 날짜로 요청하는 부분
                 },
                 child: Material(
                   color: transparent,
@@ -674,6 +700,7 @@ class _MainPageState extends State<MainPage> {
           IconButton(
               icon: Icon(Icons.search),
               onPressed: () {
+                _selectMonth.month = 0;
                 Select_date(context);
               }
           )
@@ -684,31 +711,63 @@ class _MainPageState extends State<MainPage> {
   }
   Widget lowerHalf(BuildContext context) {
     return Container(
-      color: Colors.grey,
+      color: Color.fromRGBO(231, 231, 231, 100),
       height: 7*(screenHeight/10),
       child: FutureBuilder<List<Result>>(
-        future: fetchResults(http.Client(), Date1.text, Date2.text),
+        future: _selectMonth.month == 0 ?fetchResults(http.Client(), Date1.text, Date2.text) : fetchMonthlyResults(http.Client(), _selectMonth.month),
         builder: (context, snapshot) {
           if (snapshot.hasError) print(snapshot.error);
-
-          return snapshot.hasData
-              ? ResultsList(Results: snapshot.data)
-              : Center(child: CircularProgressIndicator());
+          print(count);
+          if(_selectNewest.New == 0) {
+            return snapshot.hasData
+                ? ResultsList(Results: snapshot.data)
+                : Center(child: CircularProgressIndicator());
+          }else if(_selectNewest.New == 1){
+            return snapshot.hasData
+                ? ResultsList2(Results: snapshot.data)
+                : Center(child: CircularProgressIndicator());
+          }
         },
       ),
     );
   }
+
 
   Future<void> Select_date(BuildContext context) {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Choose Date',textAlign: TextAlign.center,),
+          title: Text('Choose Date',textAlign: TextAlign.center, style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontFamily: 'Montserrat'
+          ),),
           content: Container(
-              height: 90,
+              height: 130,
               child: Column(
                 children: <Widget>[
+                  Container(
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            child: DropdownButton<Month>(
+                              value: _selectMonth,
+                              items: _monthMenuItems,
+                              onChanged: onChangeDropdownItem,
+                            ),
+                          ),
+                          Container(
+                            child: DropdownButton(
+                              value: _selectNewest,
+                              items: _newestMenuItems,
+                              onChanged: onChangeDropdownItemnew,
+                            ),
+                          ),
+                        ],
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      )
+                  ),
                   Container(
                       child:Row(
                         children: <Widget>[
@@ -798,14 +857,26 @@ class _MainPageState extends State<MainPage> {
             FlatButton(
               child: Text('Search'),
               onPressed: () {
-                // fetchResults(http.Client(), Date1.text, Date2.text);
-                Navigator.of(context).pop(); // 버튼 요청 부분
+                Navigator.of(context).pop();
               },
             ),
           ],
         );
       },
     );
+  }
+
+  onChangeDropdownItem(Month selectMonth){
+    setState(() {
+      _selectMonth = selectMonth;
+      print("select Month: ${_selectMonth.month}");
+    });
+  }
+  onChangeDropdownItemnew(Newest selectN){
+    setState(() {
+      _selectNewest = selectN;
+      print("print : ${_selectNewest.New}");
+    });
   }
 
   //qr인식
@@ -954,6 +1025,39 @@ class _MainPageState extends State<MainPage> {
   }
 
 }
+//달 선택
+class Month{
+  int month;
+  String dal;
+
+  Month(this.month,this.dal);
+
+  static List<Month> getMonth(){
+    return <Month>[
+      Month(null, 'Clear'),
+      Month(1,'1Month'),
+      Month(3,'3Month'),
+      Month(6,'5Month'),
+    ];
+  }
+
+}
+
+class Newest{
+  int New;
+  String est;
+
+  Newest(this.New,this.est);
+
+  static List<Newest> getNewest(){
+    return <Newest>[
+      Newest(null, 'Clear'),
+      Newest(0,'Newest'),
+      Newest(1,'Oldest'),
+    ];
+  }
+
+}
 
 class Register extends StatefulWidget {
   @override
@@ -966,8 +1070,7 @@ class _RegisterState extends State<Register> {
 
   TextEditingController Id = new TextEditingController();
   TextEditingController Password = new TextEditingController();
-  TextEditingController First_Name = new TextEditingController();
-  TextEditingController Last_Name = new TextEditingController();
+  TextEditingController Name = new TextEditingController();
   TextEditingController Email = new TextEditingController();
 
   static const Color transparent = Color(0x00000000);
@@ -1026,21 +1129,9 @@ class _RegisterState extends State<Register> {
                           ),
                           SizedBox(height: 10.0),
                           TextField(
-                            controller:First_Name,
+                            controller:Name,
                             decoration: InputDecoration(
-                                labelText: 'First_NAME',
-                                labelStyle: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey),
-                                focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.green))),
-                          ),
-                          SizedBox(height: 10.0),
-                          TextField(
-                            controller:Last_Name,
-                            decoration: InputDecoration(
-                                labelText: 'Last_NAME',
+                                labelText: 'NAME',
                                 labelStyle: TextStyle(
                                     fontFamily: 'Montserrat',
                                     fontWeight: FontWeight.bold,
@@ -1131,7 +1222,7 @@ class _RegisterState extends State<Register> {
 
   Future<http.Response> postRequest() async{
     var url = 'http://dsc-ereceipt.appspot.com/api/auth/signup/';
-    PostSignUp p = new PostSignUp(Id.text, Password.text, First_Name.text,Last_Name.text ,Email.text);
+    PostSignUp p = new PostSignUp(Id.text, Password.text, Name.text,Password.text ,Email.text);
     var body = jsonEncode(p.toJson());
     print("Body : "+ body);
     http.post(url,
@@ -1162,25 +1253,44 @@ class _RegisterState extends State<Register> {
 Future<List<Result>> fetchResults(http.Client client, String date1, String date2) async {
   http.Response response;
   if (date1!="" && date2!=""){
-    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/se1234/${date1.trim()}/${date2.trim()}');
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username.trim()}/${date1.trim()}/${date2.trim()}');
+    print(response.body);
   } else {
-    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/se1234/');
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username.trim()}/');
   }
-  // compute 함수를 사용하여 parsePhotos를 별도 isolate에서 수행합니다.
   return compute(parseResults, response.body);
 }
 
-Future<List<Result>> fetchResultsTotalMoney(http.Client client) async {
+Future<List<Result>> fetchMonthlyResults(http.Client client, int month) async {
+  http.Response response;
+  if (month == 1) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${month}');
+  } else if (month == 3) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${month}');
+  } else if (month == 6) {
+    response = await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${month}');
+  }
+  print('http://dsc-ereceipt.appspot.com/api/main/receipt_list/${username}/${Month}');
+  return compute(parseResults, response.body);
+}
+
+Future<List<MoneyResult>> fetchResultsTotalMoney(http.Client client) async {
   final response =
   await client.get('http://dsc-ereceipt.appspot.com/api/main/receipt/'+username.trim()+'/');
-  // compute 함수를 사용하여 parsePhotos를 별도 isolate에서 수행합니다.
-  return compute(parseResults, response.body);
+
+  print(response.body);
+  return compute(parseMoneyResult,"["+response.body+"]");
 }
 
 List<Result> parseResults(String responseBody) {
-  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
-
+  final parsed = json.decode(responseBody).cast<Map<dynamic, dynamic>>();
   return parsed.map<Result>((json) => Result.fromJson(json)).toList();
+}
+
+List<MoneyResult> parseMoneyResult(String responseBody) {
+  final parsed = json.decode(responseBody).cast<Map<dynamic, dynamic>>();
+
+  return parsed.map<MoneyResult>((json) => MoneyResult.fromJson(json)).toList();
 }
 
 //결과 값 넣는 것
@@ -1194,7 +1304,7 @@ class Result {
 
   Result({this.id, this.user, this.receipt_img_url, this.receipt_date, this.total_price, this.device_id});
 
-  factory Result.fromJson(Map<String, dynamic> json) {
+  factory Result.fromJson(Map<dynamic, dynamic> json) {
     return Result(
       id: json['id'] as int,
       user: json['user'] as int,
@@ -1211,23 +1321,68 @@ class MoneyResult {
 
   MoneyResult({this.total_price__sum});
 
-  factory MoneyResult.fromJson(Map<String, dynamic> json) {
+  factory MoneyResult.fromJson(Map<dynamic, dynamic> json) {
     return MoneyResult(
       total_price__sum: json['total_price__sum'] as int,
     );
   }
 }
 
+
+class Top extends StatelessWidget {
+  final List<MoneyResult> MoneyResults;
+  static const Color transparent = Color(0x00000000);
+
+  Top({Key key, this.MoneyResults}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: ListView.builder(
+          itemCount: MoneyResults.length,
+          itemBuilder: (context, index) {
+            return Container(
+              child: TextField(
+                  textAlign: TextAlign.center,
+                  controller: TextEditingController()
+                    ..text = MoneyResults[index].total_price__sum.toString()+ " ￦",
+                  autofocus: false,
+                  enabled: false,
+                  decoration: new InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.only(
+                        left: 15,
+                        bottom: 11,
+                        top: 11,
+                        right: 15),
+                  ),
+                  style: TextStyle(
+                      fontSize: 40,
+                      height: 2
+                  )
+              ),
+            );
+          }
+      ),
+    );
+  }
+}
+
+
 //리스트 출력 부분 리스트 뷰로 스크롤 가능
 class ResultsList extends StatelessWidget {
   final List<Result> Results;
   static const Color transparent = Color(0x00000000);
   ResultsList({Key key, this.Results}) : super(key: key);
-
+  int a = 0;
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: Results.length,// < 8 ? 8 : Results.length,
+      itemCount: Results.length,
       itemBuilder: (context, index) {
         return Container(
             color: transparent,
@@ -1237,17 +1392,17 @@ class ResultsList extends StatelessWidget {
                 child: Row(
                   children: <Widget>[
                     Text(Results[index].receipt_date.substring(5,10)),
-                    SizedBox(width: 100,),
-                    Text(Results[index].device_id.toString())
+                    Text(Results[index].device_id.toString()),
+                    Text(Results[index].total_price.toString())
                   ],
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 ),
               ),
-              trailing: Image.network(Results.length > index ? Results[index].receipt_img_url : ""),
               onLongPress: () => {
                 SlideDialog.showSlideDialog(
                   context: context,
                   child: Expanded(
-                    child:Image.network(Results.length > index ? Results[index].receipt_img_url : "",fit: BoxFit.fill,),
+                    child:Image.network(Results[index].receipt_img_url,fit: BoxFit.fill,),
                   ),
                   barrierColor: Colors.white.withOpacity(0.7),
                   pillColor: c1,
@@ -1260,3 +1415,45 @@ class ResultsList extends StatelessWidget {
     );
   }
 }
+class ResultsList2 extends StatelessWidget {
+  final List<Result> Results;
+  static const Color transparent = Color(0x00000000);
+  ResultsList2({Key key, this.Results}) : super(key: key);
+  int a = 0;
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: Results.length,
+      itemBuilder: (context, index) {
+        return Container(
+            color: transparent,
+            child: ListTile(
+              title: Container(
+                height: 60,
+                child: Row(
+                  children: <Widget>[
+                    Text(Results[Results.length-index-1].receipt_date.substring(5,10)),
+                    Text(Results[Results.length-index-1].device_id.toString()),
+                    Text(Results[Results.length-index-1].total_price.toString())
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+              ),
+              onLongPress: () => {
+                SlideDialog.showSlideDialog(
+                  context: context,
+                  child: Expanded(
+                    child:Image.network(Results[Results.length-index-1].receipt_img_url,fit: BoxFit.fill,),
+                  ),
+                  barrierColor: Colors.white.withOpacity(0.7),
+                  pillColor: c1,
+                  backgroundColor: Colors.white,
+                )
+              },
+            )
+        );
+      },
+    );
+  }
+}
+
